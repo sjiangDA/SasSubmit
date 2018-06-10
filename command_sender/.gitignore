@@ -1,0 +1,4 @@
+*
+!.gitignore
+!command_sender.py
+!dist/

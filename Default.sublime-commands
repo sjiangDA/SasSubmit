@@ -1,0 +1,29 @@
+[
+    {
+        "caption": "SasSubmit: Choose Session",
+        "command": "sas_submit_choose_session",
+    },
+    {
+        "caption": "SasSubmit: Create Session",
+        "command": "sas_submit_create_session",
+    },
+    {
+        "caption": "Preferences: SasSubmit Settings",
+        "command": "edit_settings",
+        "args":
+        {
+            "base_file": "${packages}/SasSubmit/SasSubmit.sublime-settings",
+            "user_file": "${packages}/User/SasSubmit.sublime-settings",
+            "default": "{\n\t$0\n}\n"
+        }
+    },
+    {
+        "caption": "Preferences: SasSubmit Key Bindings",
+        "command": "edit_settings",
+        "args":
+        {
+            "base_file": "${packages}/SasSubmit/support/Default.sublime-keymap",
+            "default": "[\n\t$0\n]\n"
+        }
+    }
+]

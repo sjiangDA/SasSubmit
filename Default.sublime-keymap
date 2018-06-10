@@ -1,0 +1,8 @@
+[
+    {
+        "keys": ["f3"], "command": "sas_submit",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.sas"}
+        ]
+    }
+]
