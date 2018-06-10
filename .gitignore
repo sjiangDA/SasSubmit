@@ -4,7 +4,6 @@ code_sender*
 *test*
 *.html
 *.log
-*.png
 *debug*
 *.sublime-project
 *.sublime-workspace
