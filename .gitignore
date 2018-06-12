@@ -12,3 +12,4 @@ code_sender*
 *.pyc
 things_to_do.md
 *.json
+.DS_Store

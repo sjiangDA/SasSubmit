@@ -18,7 +18,6 @@ logging.info(sys.version)
 logging.info(json_path)
 logging.info("-------------------")
 logging.info(os.getcwd())
-print(os.getcwd())
 
 
 import urllib
@@ -30,8 +29,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-import win32api
-import win32com.client as comclt
+if os.name == "nt":
+  import win32api
+  import win32com.client as comclt
 ##############################################################
 # Define functions and modules to be used                    #
 ##############################################################
@@ -113,11 +113,16 @@ class SasSession:
     session_name = self.current_session
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-infobars")
+    if self.platform == "osx":
+      chromedriver = os.path.join(package_path, "binaries/chromedriver")
+    elif self.platform == "windows":
+      chromedriver = os.path.join(package_path, "binaries/chromedriver.exe")
     try:
-      driver = webdriver.Chrome(os.path.join(package_path, "binaries\\chromedriver.exe"), chrome_options=chrome_options)
+      self.sessions[session_name]['driver'] = webdriver.Chrome(chromedriver, chrome_options=chrome_options)
     except:
+      logging.exception("")
       send_alert("Cannot start chromedriver, check if 'chromedriver.exe' is in Sublime 'packages\\SasSubmit\\binaries\\' folder!")
-    self.sessions[session_name]['driver'] = driver
+    driver = self.sessions[session_name]['driver']
     self.sessions[session_name]["url"] = driver.command_executor._url
     self.sessions[session_name]["session_id"] = driver.session_id
 

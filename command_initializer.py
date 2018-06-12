@@ -15,7 +15,14 @@ from Default.goto_line import GotoLineCommand
 
 sas_log_name = None
 package_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-exe_path = os.path.join(package_path, "command_sender\\dist\\command_sender.exe")
+platform = sublime.platform()
+if platform == "windows":
+    exe_path = os.path.join(package_path, "command_sender\\dist\\command_sender.exe")
+elif platform == "osx":
+    exe_path = os.path.join(package_path, "command_sender/dist/command_sender.app/Contents/MacOS/command_sender")
+else:
+    sublime.error_message("SasSubmit currently not surports your platform!")
+
 json_path = os.path.join(package_path, "settings_session.json")
 
 logging.basicConfig(level=logging.DEBUG,
@@ -92,13 +99,10 @@ def create_new_session(session_name, view):
     sas_log_name = os.path.join(root_path, "SAS_"+current_session+timestr+".log")
     session_info.set("sas_log_name", sas_log_name, current_session) 
     session_info.set("root_path", root_path, current_session)
-    if sublime.platform() == 'osx':
-        # command = ["%s -u \'%s\'" % (python_path, os.path.join(package_path, "run_sas_%s.py" % target))]
-        pass
-    else:
-        # command = [python_path, "-u", os.path.join(package_path, "build\\command_sender.py"), "%s" % package_path]
-        # subprocess.check_call(command)
-        command = ["%s" % exe_path, "%s" % package_path]
+    # command = ["python3 -u \'%s\' \'%s\'" % (os.path.join(package_path, "command_sender/command_sender.py"), package_path)]
+    # command = ["%s" % exe_path, "%s" % package_path]
+    command = ["\'%s\' \'%s\'" % (exe_path, package_path)]
+    # subprocess.check_call(command)
     if "procs" in global_vars:
         pass
     else:
@@ -214,6 +218,9 @@ class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         settings = sublime.load_settings("SasSubmit.sublime-settings")
         def on_done(input_string):
+            if (sublime.platform() == "osx") & (input_string not in ["studio", "studio_ue"]):
+                sublime.error_message("Session %s was not supported on osx platform!" % input_string)
+                return
             create_new_session(input_string, self.view)
 
         def on_change(input_string):
