@@ -99,9 +99,10 @@ def create_new_session(session_name, view):
     sas_log_name = os.path.join(root_path, "SAS_"+current_session+timestr+".log")
     session_info.set("sas_log_name", sas_log_name, current_session) 
     session_info.set("root_path", root_path, current_session)
+    # command = ["C:/ProgramData/Anaconda2/envs/py35/python.exe", "-u", "\'%s\'" % os.path.join(package_path, "command_sender\\command_sender.py"), "\'%s\'" % package_path]
     # command = ["python3 -u \'%s\' \'%s\'" % (os.path.join(package_path, "command_sender/command_sender.py"), package_path)]
-    # command = ["%s" % exe_path, "%s" % package_path]
-    command = ["\'%s\' \'%s\'" % (exe_path, package_path)]
+    command = ["%s" % exe_path, "%s" % package_path]
+    # command = ["\'%s\' \'%s\'" % (exe_path, package_path)]
     # subprocess.check_call(command)
     if "procs" in global_vars:
         pass
@@ -175,7 +176,7 @@ class SasSubmitCommand(sublime_plugin.TextCommand):
         else:
             getter = CodeGetter.initialize(self.view)
             cmd = getter.get_text()
-        sublime.set_clipboard(cmd)
+        sublime.set_clipboard(cmd.replace("\n", "\r\n"))
         send_command_to_sas("submit", current_session, cmd)
         
 
@@ -276,3 +277,14 @@ class SasSubmitGeneralAlertCommand(sublime_plugin.TextCommand):
         error_msg = session_info.get("error_msg")
         sublime.message_dialog(error_msg)
 
+# class SasSubmitCommand(sublime_plugin.TextCommand):
+#     def run(self, edit, cmd=None, prog=None, confirmation=None):
+#         view = self.view
+#         cmd = ''
+#         moved = False
+#         sels = [s for s in view.sel()]
+#         a = []
+#         for s in sels:
+#             a.append(self.view.substr(s))
+#         copied = "\n".join(a)
+#         sublime.set_clipboard(copied.replace("\n", "\r\n"))

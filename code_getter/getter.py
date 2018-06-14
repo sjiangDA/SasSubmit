@@ -66,8 +66,8 @@ class CodeGetter:
                     self.advance(s)
                     moved = True
 
-            # cmd += self.substr(s) + '\n'
-            cmd += self.substr(s)
+            cmd += self.substr(s) + '\n'
+            # cmd += self.substr(s)
 
         if moved:
             view.show(view.sel())

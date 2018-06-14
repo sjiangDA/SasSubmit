@@ -71,10 +71,10 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   textfields = driver.find_elements_by_xpath(xpath_code_field)
   if paste:
       if (platform == "windows") | (platform == "linux"):
+          driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.CONTROL, "v")
       elif platform == "osx":
-          # command = re.sub("\n\t+", "\n", command)
-          # textfields[0].send_keys(command)
+          driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.SHIFT, Keys.INSERT)
   else:
       command = re.sub("\n\t+", "\n", command)
@@ -84,7 +84,7 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   # textfields[0].send_keys(Keys.CONTROL, 'a')
   submit_button = driver.find_element_by_xpath(xpath_submit_button)
   driver.execute_script("arguments[0].click();", submit_button)
-  textfields[0].send_keys(Keys.F3)
+  # textfields[0].send_keys(Keys.F3)
 
 def get_type_from_session_name(session_name):
   if session_name == "studio":
@@ -110,18 +110,36 @@ class SasSession:
     self.sessions = {}
   def create_new_driver(self):
     session_json = SessionInfo(json_path, default=False)
+    browser = session_json.get("browser")
     session_name = self.current_session
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--disable-infobars")
     if self.platform == "osx":
-      chromedriver = os.path.join(package_path, "binaries/chromedriver")
+      if browser == "chrome":
+        browserdriver = os.path.join(package_path, "binaries/chromedriver")
+      elif browser == "firefox":
+        browserdriver = os.path.join(package_path, "binaries/geckodriver")
+      else:
+        send_alert("Webdriver %s is not currently supported!" % browser)
     elif self.platform == "windows":
-      chromedriver = os.path.join(package_path, "binaries/chromedriver.exe")
+      if browser == "ie":
+        browserdriver = os.path.join(package_path, "binaries/IEDriverServer.exe")
+      elif browser == "chrome":
+        browserdriver = os.path.join(package_path, "binaries/chromedriver.exe")
+      elif browser == "firefox":
+        browserdriver = os.path.join(package_path, "binaries/geckodriver.exe")
+      else:
+        send_alert("Webdriver %s is not currently supported!" % browser)
     try:
-      self.sessions[session_name]['driver'] = webdriver.Chrome(chromedriver, chrome_options=chrome_options)
+      if browser == "ie":
+        self.sessions[session_name]['driver'] = webdriver.Ie(browserdriver)
+      elif browser == "chrome":
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--disable-infobars")
+        self.sessions[session_name]['driver'] = webdriver.Chrome(browserdriver, chrome_options=chrome_options)
+      elif browser == "firefox":
+        self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)
     except:
       logging.exception("")
-      send_alert("Cannot start chromedriver, check if 'chromedriver.exe' is in Sublime 'packages\\SasSubmit\\binaries\\' folder!")
+      send_alert("Cannot start webdriver, check if 'chromedriver.exe' is in Sublime 'packages\\SasSubmit\\binaries\\' folder!")
     driver = self.sessions[session_name]['driver']
     self.sessions[session_name]["url"] = driver.command_executor._url
     self.sessions[session_name]["session_id"] = driver.session_id
@@ -200,7 +218,7 @@ class SasSession:
     driver.AppActivate("SAS")
     win32api.Sleep(500)
     driver.SendKeys("{F6}")
-    win32api.Sleep(100)
+    win32api.Sleep(500)
     driver.SendKeys("{F1}")
 
   def studio_create_or_submit(self, mode, command=None):
@@ -227,8 +245,8 @@ class SasSession:
             break
         except:
             # logging.exception("")
-            logging.info("Cannot get current url from broswer, probably because it's not open!")
-            send_alert("Cannot get current url from broswer, probably because it's not open!")
+            logging.info("Cannot get current url from browser, probably because it's not open!")
+            send_alert("Cannot get current url from browser, probably because it's not open!")
             break
             # if 'url' in self.sessions[current_session]:
             #     self.connect_to_existing_driver()
