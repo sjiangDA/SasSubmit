@@ -9,7 +9,7 @@ This program currently supports submitting SAS command in:
 Only Windows operating system is supported at this moment. Supports for macos will be added in the future.
 
 # Installation
-Download this package and put into Sublime "packages\\" folder. The latest version of Google Chrome browser needs to be installed.
+Download this package and put into Sublime "packages\\" folder or install it using Sublime package control. The latest version of Google Chrome browser needs to be installed. The Sublime packge [`SAS Programming`](https://github.com/rpardee/sas) need to be installed prior to this package.
 
 ## Basic setup
 * Make a copy of the SasSubmit.sublime-settings and put it into Sublime "Packages/User/" folder. Make changes only to the user settings.
@@ -38,6 +38,7 @@ Download this package and put into Sublime "packages\\" folder. The latest versi
 * Open the link [http://localhost:10080](http://localhost:10080) in your browser
 * Click on the link to start SAS studio.
 * The link changes to the format like "http://localhost:10080/SASStudio/371/". Change the settings `studio_address_ue` to this link because it directly link to your SAS studio.
+* If you prefer using a browser other than Chrome, you can change the settings `browser` to be either "ie" (Internet explorer) or "firefox" (Firefox). Before you do that, make sure you download the compatible webdriver executable and put it into the `SasSubmit\binaries` folder. For 'ie', it can be downloaded from [here](http://selenium-release.storage.googleapis.com/3.9/IEDriverServer_Win32_3.9.0.zip) if you are using 32 bit IE, or [here](http://selenium-release.storage.googleapis.com/3.9/IEDriverServer_x64_3.9.0.zip) if you are using 64 bit IE. For 'firefox', it can be downloaded from [here](https://github.com/mozilla/geckodriver/releases). You need unzip the downloaded file first and put only the `.zip` file into the `binary` folder.
 
 ## SAS studio
 * Start SAS studio installed with SAS 9.4. It should open a page in your browser. The link of the web page is in the format of `http://localhost:####/?sutoken=***************************************`, where `####` is a port number and `***************************************` is the token of you SAS studio. Change `studio_address` in settings to be this link.

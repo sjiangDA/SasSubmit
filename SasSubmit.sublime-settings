@@ -3,6 +3,7 @@
     // if add time stamp to log file name: if true, will create a new log every time creating a new session
     "log_timestamped": false,
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
+    "browser": "chrome",
 
 // following settings are for submitting to classic SAS
     // estimated time for SAS program to load
