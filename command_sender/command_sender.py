@@ -193,9 +193,11 @@ class SasSession:
     logging.info("Creating sas classic ... ...")
     session_json = SessionInfo(json_path, default=False)
     loading_time = session_json.get("loading_time")
-    # command = 'cd \'%s\' & \'C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe\' -rsasuser' % self.sessions[self.current_session]['root_path']
-    # logging.info(command)
-    _ = os.popen('cd \"%s\" & \"C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe\" -rsasuser' % self.sessions[self.current_session]['root_path'])
+    sas_path = session_json.get("sas_path")
+    if not os.path.isfile(sas_path):
+      send_alert("SAS path incorrect!")
+      return
+    _ = os.popen('cd /d \"%s\" & \"%s\" -rsasuser' % (self.sessions[self.current_session]['root_path'], sas_path))
     time.sleep(loading_time)
     driver = comclt.Dispatch("Wscript.Shell")
     driver.AppActivate("SAS")

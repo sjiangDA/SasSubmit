@@ -100,9 +100,11 @@ def create_new_session(session_name, view):
     session_info.set("sas_log_name", sas_log_name, current_session) 
     session_info.set("root_path", root_path, current_session)
     # command = ["C:/ProgramData/Anaconda2/envs/py35/python.exe", "-u", "\'%s\'" % os.path.join(package_path, "command_sender\\command_sender.py"), "\'%s\'" % package_path]
+    # command = ["\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)]
     # command = ["python3 -u \'%s\' \'%s\'" % (os.path.join(package_path, "command_sender/command_sender.py"), package_path)]
     command = ["%s" % exe_path, "%s" % package_path]
     # command = ["\'%s\' \'%s\'" % (exe_path, package_path)]
+    logging.info(command)
     # subprocess.check_call(command)
     if "procs" in global_vars:
         pass
@@ -111,8 +113,8 @@ def create_new_session(session_name, view):
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            )
 
+            )
     cmd = "x \'cd \"%s\"\';" % root_path
     sublime.set_clipboard(cmd)
     send_command_to_sas("create", current_session, cmd)

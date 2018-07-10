@@ -22,7 +22,7 @@ class SessionInfo:
 
 	def load_default(self):
 		settings = sublime.load_settings("SasSubmit.sublime-settings")
-		for key in ["default_session", "log_timestamped", "subl_path", "browser", "loading_time", 
+		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser", "loading_time", 
 			"log_exclude", "studio_address", "xpath_code_tab", "xpath_clear_button", 
 			"xpath_code_field", "xpath_submit_button", "studio_address_ue", 
 			"xpath_code_tab_ue", "xpath_clear_button_ue", "xpath_code_field_ue", 
