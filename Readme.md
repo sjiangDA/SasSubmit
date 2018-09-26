@@ -12,7 +12,7 @@ Only Windows operating system is supported at this moment. Supports for macos wi
 Download this package and put into Sublime "packages\\" folder or install it using Sublime package control. The latest version of Google Chrome browser needs to be installed. The Sublime packge [`SAS Programming`](https://github.com/rpardee/sas) need to be installed prior to this package.
 
 ## Basic setup
-* Make a copy of the SasSubmit.sublime-settings and put it into Sublime "Packages/User/" folder. Make changes only to the user settings.
+* Make a copy of the SasSubmit.sublime-settings and put it into Sublime "Packages/User/" folder. Or open the menu "Preferences/Pacakge Settings/SasSubmit/Settings", then copy from the default settings and paste into the user settings. Make changes only to the user settings.
 
 ## Classic mode
 * In settings change `loading_time` to the estimated time for SAS to start up (normally 2-5 seconds depends on your hardare). 

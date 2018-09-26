@@ -4,6 +4,7 @@ import time
 import json
 import os, inspect
 import re
+import subprocess
 
 package_path = sys.argv[1]
 sys.path.append(package_path)
@@ -29,9 +30,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+import psutil
 if os.name == "nt":
   import win32api
   import win32com.client as comclt
+  import win32gui
 ##############################################################
 # Define functions and modules to be used                    #
 ##############################################################
@@ -86,7 +89,8 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   driver.execute_script("arguments[0].click();", submit_button)
   # textfields[0].send_keys(Keys.F3)
 
-def get_type_from_session_name(session_name):
+def get_type_from_session_name(session):
+  session_name = session.split(":")[0]
   if session_name == "studio":
     return "studio"
   elif session_name == "studio_ue":
@@ -96,6 +100,18 @@ def get_type_from_session_name(session_name):
   else:
     send_alert("The session has to be one of these: studio, studio_ue, classic.", )
 
+def find_sas_pid():
+  pids = []
+  for pid in psutil.pids():
+      try:
+        p  = psutil.Process(pid)
+        if p.name() == 'sas.exe':
+          cmdline = p.cmdline()
+          if not max([x == '-noautoexec' for x in cmdline]):
+            pids.append(pid)
+      except:
+          pass
+  return pids
 
 class SessionRemote(webdriver.Remote):
     def start_session(self, desired_capabilities, browser_profile=None):
@@ -190,6 +206,14 @@ class SasSession:
     pass
 
   def classic_create(self):
+    session_is_default = (self.current_session.split(":")[1] == "default")
+    if session_is_default:
+      active_sas_pids = find_sas_pid()
+      if len(active_sas_pids) == 0:
+        pass
+      else:
+        return
+
     logging.info("Creating sas classic ... ...")
     session_json = SessionInfo(json_path, default=False)
     loading_time = session_json.get("loading_time")
@@ -197,31 +221,52 @@ class SasSession:
     if not os.path.isfile(sas_path):
       send_alert("SAS path incorrect!")
       return
-    _ = os.popen('cd /d \"%s\" & \"%s\" -rsasuser' % (self.sessions[self.current_session]['root_path'], sas_path))
-    time.sleep(loading_time)
-    driver = comclt.Dispatch("Wscript.Shell")
-    driver.AppActivate("SAS")
-    win32api.Sleep(1000)
-    driver.SendKeys("{F5}")
-    win32api.Sleep(100)
-    driver.SendKeys("^{F4}")
-    win32api.Sleep(100)
-    driver.SendKeys("{F7}")
-    win32api.Sleep(100)
-    driver.SendKeys("^{F4}")
+    proc = subprocess.Popen('\"%s\" -rsasuser -sasinitialfolder = \"%s\"' % (sas_path, self.sessions[self.current_session]['root_path']))
+    session_json.set("pid", proc.pid, self.current_session)
+    # time.sleep(loading_time)
+    # driver = comclt.Dispatch("WScript.Shell")
+    # win32api.Sleep(1000)
+    # driver.SendKeys("{F5}")
+    # win32api.Sleep(100)
+    # driver.SendKeys("^{F4}")
+    # win32api.Sleep(100)
+    # driver.SendKeys("{F7}")
+    # win32api.Sleep(100)
+    # driver.SendKeys("^{F4}")
 
   def classic_submit(self):
-    try: 
-        driver = comclt.GetActiveObject("SAS.Application")
-    except:
-        send_alert("No SAS program opening!")
+    session_is_default = self.current_session.split(":")[1] == "default"
+    session_json = SessionInfo(json_path, default=False)
+
     logging.info("Submitting to sas classic ... ...")
-    driver = comclt.Dispatch("Wscript.Shell")
-    driver.AppActivate("SAS")
-    win32api.Sleep(500)
-    driver.SendKeys("{F6}")
-    win32api.Sleep(500)
-    driver.SendKeys("{F1}")
+    active_sas_pids = find_sas_pid()
+    if session_is_default:
+      if len(active_sas_pids) == 0:
+        self.classic_create()
+      else:
+        driver = comclt.Dispatch("WScript.Shell")
+        driver.AppActivate("SAS")
+        win32api.Sleep(100)
+        driver.SendKeys("{F6}")
+        win32api.Sleep(100)
+        driver.SendKeys("{F1}")
+        win32api.Sleep(1000)
+    else:
+      pid = session_json.settings["sessions"][self.current_session]['pid']
+      if pid in active_sas_pids:
+        pass
+      else:
+        send_alert("The requested session is not current running!")
+        session_json.delete_session(self.current_session)
+        return
+      driver = comclt.Dispatch("WScript.Shell")
+      driver.AppActivate(pid)
+      win32api.Sleep(100)
+      driver.SendKeys("{F6}")
+      win32api.Sleep(100)
+      driver.SendKeys("{F1}")
+      win32api.Sleep(1000)
+
 
   def studio_create_or_submit(self, mode, command=None):
     session_json = SessionInfo(json_path, default=False)
@@ -239,6 +284,7 @@ class SasSession:
             # logging.exception("")
             logging.info("Old connection is not working any more")
             send_alert("urllib.error.URLError: Previous Studio connection was killed!")
+            session_json.delete_session(current_session)
             break
         except selenium.common.exceptions.WebDriverException:
             # logging.exception("")

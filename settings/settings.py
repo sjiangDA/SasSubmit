@@ -47,3 +47,7 @@ class SessionInfo:
 		if save:
 			self.save()
 
+	def delete_session(self, session):
+		self.settings["sessions"].pop(session, None)
+		self.save()
+

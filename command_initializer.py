@@ -72,16 +72,15 @@ def send_command_to_sas(mode, session_name, command):
     except:
         logging.exception("")
 
-def create_new_session(session_name, view):
+def create_new_session(session, view):
     settings = sublime.load_settings("SasSubmit.sublime-settings")
-    python_path = settings.get("python_path")
 
     session_info = SessionInfo(json_path)
     session_info.load_default()
     session_info.save()
 
     sessions_list = session_info.get("sessions")
-    current_session = session_name
+    current_session = session
 
     filepath = view.file_name()
     try:
@@ -165,7 +164,7 @@ class SasSubmitCommand(sublime_plugin.TextCommand):
         if current_session:
             pass
         else:
-            create_new_session("classic", self.view)
+            create_new_session("classic:default", self.view)
             return
         # set CodeGetter before get_text() because get_text may change cursor locations.
         if confirmation:
@@ -217,14 +216,34 @@ class SasSubmitChooseSessionCommand(sublime_plugin.TextCommand):
         self.show_quick_panel(sessions_list, on_done, selected_index=selected_index)
 
 
+def parse_session_name(string):
+    splits = string.split(":")
+    if (len(splits) > 2) | (len(splits) == 0):
+        sublime.message_dialog("Incorrect format of session name!\nCorrect format is XXXX:YYYY")
+    session = splits[0].strip()
+    instance = time.strftime("%m%d%H%M%S")
+    if (len(splits) == 1) & (session == "classic"):
+        instance = "default"
+    if len(splits) == 2:
+        _instance = splits[1].strip() 
+        if _instance != "":
+            instance = _instance
+    session = "%s:%s" % (session, instance)
+    return session
+
+
+
+
 class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         settings = sublime.load_settings("SasSubmit.sublime-settings")
         def on_done(input_string):
-            if (sublime.platform() == "osx") & (input_string not in ["studio", "studio_ue"]):
-                sublime.error_message("Session %s was not supported on osx platform!" % input_string)
+            session = parse_session_name(input_string)
+            session_name = session.split(":")[0]
+            if (sublime.platform() == "osx") & (session_name not in ["studio", "studio_ue"]):
+                sublime.error_message("Session %s was not supported on osx platform!" % session)
                 return
-            create_new_session(input_string, self.view)
+            create_new_session(session, self.view)
 
         def on_change(input_string):
             pass
