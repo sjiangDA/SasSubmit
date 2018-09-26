@@ -35,6 +35,9 @@ if os.name == "nt":
   import win32api
   import win32com.client as comclt
   import win32gui
+  from pywinauto import Application, win32defines
+  from pywinauto.win32functions import SetForegroundWindow, ShowWindow
+
 ##############################################################
 # Define functions and modules to be used                    #
 ##############################################################
@@ -113,6 +116,21 @@ def find_sas_pid():
           pass
   return pids
 
+
+def activate_window(path="", pid=0):
+    if pid > 0:
+        app = Application().connect(process=pid)
+    else:
+        app = Application().connect(path=path)
+    w = app.top_window()
+
+    #bring window into foreground
+    if w.has_style(win32defines.WS_MINIMIZE): # if minimized
+        ShowWindow(w.wrapper_object(), 9) # restore window state
+    else:
+        SetForegroundWindow(w.wrapper_object()) #bring to front
+
+
 class SessionRemote(webdriver.Remote):
     def start_session(self, desired_capabilities, browser_profile=None):
         # Skip the NEW_SESSION command issued by the original driver
@@ -123,6 +141,7 @@ class SasSession:
   def __init__(self):
     session_json = SessionInfo(json_path, default=False)
     self.platform = session_json.get("platform")
+    self.sas_path = session_json.get("sas_path")
     self.sessions = {}
   def create_new_driver(self):
     session_json = SessionInfo(json_path, default=False)
@@ -244,12 +263,12 @@ class SasSession:
       if len(active_sas_pids) == 0:
         self.classic_create()
       else:
+        activate_window(path=self.sas_path)
         driver = comclt.Dispatch("WScript.Shell")
-        driver.AppActivate("SAS")
-        win32api.Sleep(100)
-        driver.SendKeys("{F6}")
-        win32api.Sleep(100)
-        driver.SendKeys("{F1}")
+        win32api.Sleep(500)
+        # driver.SendKeys("{F6}")
+        # win32api.Sleep(1000)
+        driver.SendKeys("{F4}")
         win32api.Sleep(1000)
     else:
       pid = session_json.settings["sessions"][self.current_session]['pid']
@@ -259,12 +278,13 @@ class SasSession:
         send_alert("The requested session is not current running!")
         session_json.delete_session(self.current_session)
         return
+      activate_window(pid=pid)
       driver = comclt.Dispatch("WScript.Shell")
-      driver.AppActivate(pid)
-      win32api.Sleep(100)
-      driver.SendKeys("{F6}")
-      win32api.Sleep(100)
-      driver.SendKeys("{F1}")
+      # driver.AppActivate(pid)
+      win32api.Sleep(500)
+      # driver.SendKeys("{F6}")
+      # win32api.Sleep(1000)
+      driver.SendKeys("{F4}")
       win32api.Sleep(1000)
 
 
