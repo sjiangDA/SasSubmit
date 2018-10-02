@@ -4,7 +4,6 @@ import os, inspect
 import re
 import subprocess
 import time
-from .reload_log import *
 from .settings import SessionInfo
 import threading
 import json
@@ -13,7 +12,11 @@ import sys
 from .code_getter import CodeGetter
 from Default.goto_line import GotoLineCommand
 
-sas_log_name = None
+
+############################################################
+# Set global variables
+############################################################
+# Get environment variables
 package_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 platform = sublime.platform()
 if platform == "windows":
@@ -25,28 +28,12 @@ else:
 
 json_path = os.path.join(package_path, "settings_session.json")
 
+# Setting logging
 logging.basicConfig(level=logging.DEBUG,
     format='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y/%m/%d %H:%M:%S',
-    filename=os.path.join(package_path, "main_python.log"),
+    filename=os.path.join(package_path, "command_initializer.log"),
     filemode="w")
-logging.info(sys.version)
-logging.info("-------------------")
-logging.info(json_path)
-logging.info(package_path)
-
-session_info = SessionInfo(json_path, default=True)
-session_info.save()
-
-def escape_dquote(cmd):
-    cmd = cmd.replace('"', '\\"')
-    cmd = cmd.replace("\'", "\'")
-    return cmd
-
-def escape_squote(cmd):
-    cmd = cmd.replace('\\', '\\\\')
-    cmd = cmd.replace("\'", "\'")
-    return cmd
 
 PATTERN = re.compile(r"""
     (?P<quote>["'])
@@ -62,10 +49,29 @@ PATTERN = re.compile(r"""
 
 global_vars = {}
 
+# Initialize session information
+session_info = SessionInfo(json_path, default=True)
+session_info.save()
+
+
+############################################################
+# Define help functions
+############################################################
+
+def escape_dquote(cmd):
+    cmd = cmd.replace('"', '\\"')
+    cmd = cmd.replace("\'", "\'")
+    return cmd
+
+def escape_squote(cmd):
+    cmd = cmd.replace('\\', '\\\\')
+    cmd = cmd.replace("\'", "\'")
+    return cmd
+
+
 def send_command_to_sas(mode, session_name, command):
     try:
         command = "%r"%command
-        # cmd = escape_dquote(cmd)
         cmd = 'list(["{}", "{}" ,{}])\n'.format(mode, session_name, command)
         global_vars['procs'].stdin.write(cmd.encode("ascii"))
         global_vars['procs'].stdin.flush()
@@ -78,6 +84,13 @@ def create_new_session(session, view):
     session_info = SessionInfo(json_path)
     session_info.load_default()
     session_info.save()
+
+    # warn existing users of the new version:
+    update_warning = settings.get("update_warning_1810")
+    if update_warning:
+        session_info.set("error_msg", "You have updated to the latest version of SasSubmit!\nIn this version the configuration of SAS keys has changed, please follow instructions on 'https://packagecontrol.io/packages/SasSubmit' to update your SAS configuration.\nTo disable this message, go to Perferences>Package Settings>SasSubmit>Settings and change 'update_warning_1810' to be false")
+        view.run_command("sas_submit_general_alert")
+        return
 
     sessions_list = session_info.get("sessions")
     current_session = session
@@ -95,16 +108,10 @@ def create_new_session(session, view):
         timestr = time.strftime("_%Y%m%d_%H%M%S")
     else:
         timestr = ""
-    sas_log_name = os.path.join(root_path, "SAS_"+current_session+timestr+".log")
-    session_info.set("sas_log_name", sas_log_name, current_session) 
     session_info.set("root_path", root_path, current_session)
-    # command = ["C:/ProgramData/Anaconda2/envs/py35/python.exe", "-u", "\'%s\'" % os.path.join(package_path, "command_sender\\command_sender.py"), "\'%s\'" % package_path]
-    # command = ["\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)]
-    # command = ["python3 -u \'%s\' \'%s\'" % (os.path.join(package_path, "command_sender/command_sender.py"), package_path)]
+    # command = "\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
     command = ["%s" % exe_path, "%s" % package_path]
-    # command = ["\'%s\' \'%s\'" % (exe_path, package_path)]
     logging.info(command)
-    # subprocess.check_call(command)
     if "procs" in global_vars:
         pass
     else:
@@ -112,15 +119,53 @@ def create_new_session(session, view):
             shell=True,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-
             )
+
     cmd = "x \'cd \"%s\"\';" % root_path
-    sublime.set_clipboard(cmd)
+    sublime.set_clipboard(cmd.replace("\n", "\r\n"))
     send_command_to_sas("create", current_session, cmd)
+
+def parse_session_name(string):
+    splits = string.split(":")
+    if (len(splits) > 2) | (len(splits) == 0):
+        sublime.message_dialog("Incorrect format of session name!\nCorrect format is XXXX:YYYY")
+    session = splits[0].strip()
+    instance = time.strftime("%m%d%H%M%S")
+    if (len(splits) == 1) & (session == "classic"):
+        instance = "default"
+    if len(splits) == 2:
+        _instance = splits[1].strip() 
+        if _instance != "":
+            instance = _instance
+    session = "%s:%s" % (session, instance)
+    return session
+
+
+############################################################
+# Define Sublime commands                                  # 
+############################################################
+
+class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        settings = sublime.load_settings("SasSubmit.sublime-settings")
+        def on_done(input_string):
+            session = parse_session_name(input_string)
+            session_name = session.split(":")[0]
+            if (sublime.platform() == "osx") & (session_name not in ["studio", "studio_ue"]):
+                sublime.error_message("Session %s was not supported on osx platform!" % session)
+                return
+            create_new_session(session, self.view)
+
+        def on_change(input_string):
+            pass
+        def on_cancel():
+            pass
+        window = self.view.window()
+        window.show_input_panel("Session to Create:", settings.get("default_session"),
+                                 on_done, on_change, on_cancel)
 
 
 class SasSubmitCommand(sublime_plugin.TextCommand):
-
     def resolve(self, cmd):
         view = self.view
         window = view.window()
@@ -143,7 +188,6 @@ class SasSubmitCommand(sublime_plugin.TextCommand):
                     break
 
         def convert(m):
-            print("Start converting... ...")
             quote = m.group("quote")
             if quote:
                 var = sublime.expand_variables(m.group("quoted_var"), extracted_variables)
@@ -177,11 +221,10 @@ class SasSubmitCommand(sublime_plugin.TextCommand):
         else:
             getter = CodeGetter.initialize(self.view)
             cmd = getter.get_text()
+
         sublime.set_clipboard(cmd.replace("\n", "\r\n"))
         send_command_to_sas("submit", current_session, cmd)
         
-
-
 class SasSubmitChooseSessionCommand(sublime_plugin.TextCommand):
     def show_quick_panel(self, options, done, **kwargs):
         sublime.set_timeout(
@@ -216,96 +259,23 @@ class SasSubmitChooseSessionCommand(sublime_plugin.TextCommand):
         self.show_quick_panel(sessions_list, on_done, selected_index=selected_index)
 
 
-def parse_session_name(string):
-    splits = string.split(":")
-    if (len(splits) > 2) | (len(splits) == 0):
-        sublime.message_dialog("Incorrect format of session name!\nCorrect format is XXXX:YYYY")
-    session = splits[0].strip()
-    instance = time.strftime("%m%d%H%M%S")
-    if (len(splits) == 1) & (session == "classic"):
-        instance = "default"
-    if len(splits) == 2:
-        _instance = splits[1].strip() 
-        if _instance != "":
-            instance = _instance
-    session = "%s:%s" % (session, instance)
-    return session
-
-
-
-
-class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        settings = sublime.load_settings("SasSubmit.sublime-settings")
-        def on_done(input_string):
-            session = parse_session_name(input_string)
-            session_name = session.split(":")[0]
-            if (sublime.platform() == "osx") & (session_name not in ["studio", "studio_ue"]):
-                sublime.error_message("Session %s was not supported on osx platform!" % session)
-                return
-            create_new_session(session, self.view)
-
-        def on_change(input_string):
-            pass
-
-        def on_cancel():
-            pass
-
-        window = self.view.window()
-        window.show_input_panel("Session to Create:", settings.get("default_session"),
-                                 on_done, on_change, on_cancel)
-
-
-
-class SasSubmitStartRefreshLogCommand(sublime_plugin.TextCommand):
+class SasSubmitSetDirectoryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         session_info = SessionInfo(json_path, default=False)
         current_session = session_info.get("current_session")
-        filename = session_info.settings['sessions'][current_session]['sas_log_name']
-        log_found = False
-        for window in sublime.windows():
-            if window.find_open_file(filename):
-                log_found = True
-                print("start refreshing sas log %s..." % filename)
-                print("window = %s..." % window.id())
-                log_view = window.find_open_file(filename)
-                enable_autorefresh_for_view(log_view)
-
-        if not log_found:
-            print("File not found, open it again ... ...")
-            sublime.active_window().open_file(filename)
-
-
-
-class SasSubmitStopRefreshLogCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        session_info = SessionInfo(json_path, default=False)
-        current_session = session_info.get("current_session")
-        filename = session_info.settings['sessions'][current_session]['sas_log_name']
-        for window in sublime.windows():
-            if window.find_open_file(filename):
-                log_found = True
-                print("stop refreshing sas log %s..." % filename)
-                print("window = %s..." % window.id())
-
-                log_view = window.find_open_file(filename)
-                disable_autorefresh_for_view(log_view)
-
+        filepath = self.view.file_name()
+        try:
+            root_path = os.path.dirname(filepath)
+        except:
+            session_info.set("error_msg", "Please open one file to start SAS session!")
+            view.run_command("sas_submit_general_alert")
+            return
+        cmd = "x \'cd \"%s\"\';" % root_path
+        sublime.set_clipboard(cmd.replace("\n", "\r\n"))
+        send_command_to_sas("submit", current_session, cmd)
 
 class SasSubmitGeneralAlertCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         session_info = SessionInfo(json_path, default=False)
         error_msg = session_info.get("error_msg")
         sublime.message_dialog(error_msg)
-
-# class SasSubmitCommand(sublime_plugin.TextCommand):
-#     def run(self, edit, cmd=None, prog=None, confirmation=None):
-#         view = self.view
-#         cmd = ''
-#         moved = False
-#         sels = [s for s in view.sel()]
-#         a = []
-#         for s in sels:
-#             a.append(self.view.substr(s))
-#         copied = "\n".join(a)
-#         sublime.set_clipboard(copied.replace("\n", "\r\n"))

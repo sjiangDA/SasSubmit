@@ -14,3 +14,4 @@ things_to_do.md
 *.json
 .DS_Store
 *.spec
+.clipboard

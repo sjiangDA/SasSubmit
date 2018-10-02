@@ -5,22 +5,6 @@ import json
 import os, inspect
 import re
 import subprocess
-
-package_path = sys.argv[1]
-sys.path.append(package_path)
-json_path = os.path.join(package_path, "settings_session.json")
-
-logging.basicConfig(level=logging.DEBUG,
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    datefmt='%Y/%m/%d %H:%M:%S',
-    filename=os.path.join(package_path, "SasSubmit.log"),
-    filemode="w")
-logging.info(sys.version)
-logging.info(json_path)
-logging.info("-------------------")
-logging.info(os.getcwd())
-
-
 import urllib
 import urllib.request
 import selenium
@@ -37,6 +21,19 @@ if os.name == "nt":
   import win32gui
   from pywinauto import Application, win32defines
   from pywinauto.win32functions import SetForegroundWindow, ShowWindow
+
+package_path = sys.argv[1]
+json_path = os.path.join(package_path, "settings_session.json")
+
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%Y/%m/%d %H:%M:%S',
+    filename=os.path.join(package_path, "command_sender.log"),
+    filemode="w")
+logging.info(sys.version)
+logging.info(json_path)
+logging.info("-------------------")
+logging.info(os.getcwd())
 
 ##############################################################
 # Define functions and modules to be used                    #
@@ -83,6 +80,7 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
           driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.SHIFT, Keys.INSERT)
   else:
+      logging.info("sending command %s" % command)
       command = re.sub("\n\t+", "\n", command)
       textfields[0].send_keys(command)
   # submit
@@ -91,6 +89,12 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   submit_button = driver.find_element_by_xpath(xpath_submit_button)
   driver.execute_script("arguments[0].click();", submit_button)
   # textfields[0].send_keys(Keys.F3)
+
+def submit_to_classic():
+  driver = comclt.Dispatch("WScript.Shell")
+  win32api.Sleep(500)
+  driver.SendKeys("{F4}")
+  win32api.Sleep(1000)
 
 def get_type_from_session_name(session):
   session_name = session.split(":")[0]
@@ -121,7 +125,7 @@ def activate_window(path="", pid=0):
     if pid > 0:
         app = Application().connect(process=pid)
     else:
-        app = Application().connect(path=path)
+        app = Application().connect(title="SAS", found_index=0)
     w = app.top_window()
 
     #bring window into foreground
@@ -130,6 +134,51 @@ def activate_window(path="", pid=0):
     else:
         SetForegroundWindow(w.wrapper_object()) #bring to front
 
+#-------------------------------------------------
+# Define functions to find webdriver pid         -
+#-------------------------------------------------
+def get_ie_port_pid():
+  port_pid_dict = {}
+  for pid in psutil.pids():
+    try:
+      p  = psutil.Process(pid)
+      port = 0
+      if p.name() == "iexplore.exe":
+        for x in p.cmdline():
+          r = re.search("(?<=(localhost:))\d+(?=.*)", x)
+          try:
+            port_str = r.group(0)
+            port_pid_dict[int(port_str)] = pid
+          except:
+            pass
+    except:
+      pass
+  return port_pid_dict
+
+def get_ie_pid(driver):
+  initial_url = driver.capabilities['se:ieOptions']['initialBrowserUrl']
+  r = re.search("(?<=(localhost:))\d+(?=.*)", initial_url)
+  port = int(r.group(0))
+  ie_port_pid_dict = get_ie_port_pid()
+  try:
+    pid = ie_port_pid_dict[port]
+  except:
+    pid = 0
+  return pid
+
+def get_driver_pid(driver):
+  browserName = driver.capabilities['browserName']
+  if browserName == "internet explorer":
+    pid = get_ie_pid(driver)
+  else:
+    pid = driver.service.process.pid
+  return pid
+
+
+#------------------------------------
+# other helper functions            -
+#------------------------------------
+
 
 class SessionRemote(webdriver.Remote):
     def start_session(self, desired_capabilities, browser_profile=None):
@@ -137,12 +186,123 @@ class SessionRemote(webdriver.Remote):
         # and set only some required attributes
         self.w3c = True
 
+
+#########################################
+# Main program for sending code         #
+#########################################
+
+
 class SasSession:
   def __init__(self):
     session_json = SessionInfo(json_path, default=False)
     self.platform = session_json.get("platform")
     self.sas_path = session_json.get("sas_path")
     self.sessions = {}
+
+  def create_new_session(self, session_name, command=None):
+    # logging.info("The initial command is %s" % command)
+    self.current_session = session_name
+    self.sessions[session_name] = {}
+    type = get_type_from_session_name(self.current_session)
+    self.sessions[session_name]['type'] = type
+    self.assign_info()
+    if type in ["studio", "studio_ue"]:
+      self.studio_create_or_submit("create", command)
+    elif type == "classic":
+      self.classic_create()
+
+  def submit(self, command):
+    current_session = self.current_session
+    current_session_type = self.sessions[current_session]['type']
+    if current_session_type in ["studio", "studio_ue"]:
+      self.studio_create_or_submit("submit", command)
+    elif current_session_type == "classic":
+      self.classic_submit()
+      
+  def switch(self, session_name):
+    self.current_session = session_name
+
+  def kill(self, session_name):
+    pass
+
+
+  def assign_info(self):
+    session_json = SessionInfo(json_path, default=False)
+    current_session = self.current_session
+    current_session_type = self.sessions[current_session]['type']
+    root_path = session_json.settings["sessions"][current_session]['root_path']
+    self.sessions[current_session]['root_path'] = root_path
+    if current_session_type == "studio":
+      self.sessions[current_session]['xpath_code_tab'] = session_json.get("xpath_code_tab")
+      self.sessions[current_session]['studio_address'] = session_json.get("studio_address")
+    elif current_session_type == "studio_ue":
+      self.sessions[current_session]['xpath_code_tab'] = session_json.get("xpath_code_tab_ue")
+      self.sessions[current_session]['studio_address'] = session_json.get("studio_address_ue")
+
+  def studio_create_or_submit(self, mode, command=None):
+    session_json = SessionInfo(json_path, default=False)
+    current_session = self.current_session
+    current_session_type = self.sessions[current_session]['type']
+
+    if 'driver' in self.sessions[current_session]:
+      pass
+    else:
+      self.create_new_driver()
+    while True:
+        try:
+            url = self.sessions[current_session]['driver'].current_url
+        except urllib.error.URLError:
+            logging.info("Old connection is not working any more")
+            send_alert("urllib.error.URLError: Previous Studio connection was killed!")
+            session_json.delete_session(current_session)
+            break
+        except selenium.common.exceptions.WebDriverException:
+            logging.info("Browser was killed!")
+            send_alert("selenium.common.exceptions.WebDriverException: Previous Studio connection was killed!")
+            break
+        except:
+            logging.info("Cannot get current url from browser, probably because it's not open!")
+            send_alert("Cannot get current url from browser, probably because it's not open!")
+            break
+
+        if current_session_type == "studio_ue":
+          found_loading = re.search('localhost.*', url)
+          found_loaded = re.search('localhost.*main\?locale', url)
+        else:
+          found_loading = re.search('localhost.*\?sutoken', url)
+          found_loaded = re.search('localhost.*main\?locale', url)
+        # also need to check if the url matches the one specified in user settings
+        # if it matches but it cannot open probabaly the url in settings is not working
+        if found_loaded:
+            delay = 60
+            try:
+                logging.info("Page is loaded, checking if page is ready .................")
+                myElem = WebDriverWait(self.sessions[current_session]['driver'], delay).until(EC.presence_of_element_located((By.XPATH, self.sessions[current_session]['xpath_code_tab'])))
+                logging.info("Page is ready!")
+            except TimeoutException:
+                error_msg = "Loading took too much time, please try using a different browser!"
+                logging.info(error_msg)
+                send_alert(error_msg)
+                break
+            if mode == "submit":
+                pid = session_json.settings["sessions"][self.current_session]['pid']
+                activate_window(pid = pid)
+                submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
+                break
+            else:
+              break
+
+        elif found_loading:
+            try:
+              url_code = urllib.request.urlopen(url).getcode()
+            except:
+              send_alert("Cannot connect to server, check if server is running or if you provide the correct link!")
+              return
+            logging.info("Page is still loading, waiting ...................")
+            time.sleep(2)
+        else:
+            self.sessions[current_session]['driver'].get(self.sessions[current_session]['studio_address'])
+            
   def create_new_driver(self):
     session_json = SessionInfo(json_path, default=False)
     browser = session_json.get("browser")
@@ -178,51 +338,8 @@ class SasSession:
     driver = self.sessions[session_name]['driver']
     self.sessions[session_name]["url"] = driver.command_executor._url
     self.sessions[session_name]["session_id"] = driver.session_id
-
-  def connect_to_existing_driver(self):
-    session_name = self.current_session
-    self.sessions[session_name]['driver'] = SessionRemote(command_executor=self.sessions[session_name]['url'], desired_capabilities={})
-    self.sessions[session_name]['driver'].session_id = self.sessions[session_name]['session_id']
-
-  def assign_info(self):
-    session_json = SessionInfo(json_path, default=False)
-    current_session = self.current_session
-    current_session_type = self.sessions[current_session]['type']
-    
-    root_path = session_json.settings["sessions"][current_session]['root_path']
-    self.sessions[current_session]['root_path'] = root_path
-    self.sessions[current_session]['sas_log_name'] = session_json.settings['sessions'][current_session]['sas_log_name']
-    if current_session_type == "studio":
-      self.sessions[current_session]['xpath_code_tab'] = session_json.get("xpath_code_tab")
-      self.sessions[current_session]['studio_address'] = session_json.get("studio_address")
-    elif current_session_type == "studio_ue":
-      self.sessions[current_session]['xpath_code_tab'] = session_json.get("xpath_code_tab_ue")
-      self.sessions[current_session]['studio_address'] = session_json.get("studio_address_ue")
-
-  def create_new_session(self, session_name):
-    self.current_session = session_name
-    self.sessions[session_name] = {}
-    type = get_type_from_session_name(self.current_session)
-    self.sessions[session_name]['type'] = type
-    self.assign_info()
-    if type in ["studio", "studio_ue"]:
-      self.studio_create_or_submit("create")
-    elif type == "classic":
-      self.classic_create()
-
-  def submit(self, command):
-    current_session = self.current_session
-    current_session_type = self.sessions[current_session]['type']
-    if current_session_type in ["studio", "studio_ue"]:
-      self.studio_create_or_submit("submit", command)
-    elif current_session_type == "classic":
-      self.classic_submit()
-
-  def switch(self, session_name):
-    self.current_session = session_name
-
-  def kill(self, session_name):
-    pass
+    pid = get_driver_pid(driver)
+    session_json.set("pid", pid, self.current_session)
 
   def classic_create(self):
     session_is_default = (self.current_session.split(":")[1] == "default")
@@ -242,16 +359,6 @@ class SasSession:
       return
     proc = subprocess.Popen('\"%s\" -rsasuser -sasinitialfolder = \"%s\"' % (sas_path, self.sessions[self.current_session]['root_path']))
     session_json.set("pid", proc.pid, self.current_session)
-    # time.sleep(loading_time)
-    # driver = comclt.Dispatch("WScript.Shell")
-    # win32api.Sleep(1000)
-    # driver.SendKeys("{F5}")
-    # win32api.Sleep(100)
-    # driver.SendKeys("^{F4}")
-    # win32api.Sleep(100)
-    # driver.SendKeys("{F7}")
-    # win32api.Sleep(100)
-    # driver.SendKeys("^{F4}")
 
   def classic_submit(self):
     session_is_default = self.current_session.split(":")[1] == "default"
@@ -264,100 +371,20 @@ class SasSession:
         self.classic_create()
       else:
         activate_window(path=self.sas_path)
-        driver = comclt.Dispatch("WScript.Shell")
-        win32api.Sleep(500)
-        # driver.SendKeys("{F6}")
-        # win32api.Sleep(1000)
-        driver.SendKeys("{F4}")
-        win32api.Sleep(1000)
+        submit_to_classic()
     else:
+      logging.info("submitting to non-default sas session")
       pid = session_json.settings["sessions"][self.current_session]['pid']
       if pid in active_sas_pids:
         pass
       else:
-        send_alert("The requested session is not current running!")
         session_json.delete_session(self.current_session)
+        send_alert("The requested session is not current running!")
         return
       activate_window(pid=pid)
-      driver = comclt.Dispatch("WScript.Shell")
-      # driver.AppActivate(pid)
-      win32api.Sleep(500)
-      # driver.SendKeys("{F6}")
-      # win32api.Sleep(1000)
-      driver.SendKeys("{F4}")
-      win32api.Sleep(1000)
+      submit_to_classic()
 
 
-  def studio_create_or_submit(self, mode, command=None):
-    session_json = SessionInfo(json_path, default=False)
-    current_session = self.current_session
-    current_session_type = self.sessions[current_session]['type']
-
-    if 'driver' in self.sessions[current_session]:
-      pass
-    else:
-      self.create_new_driver()
-    while True:
-        try:
-            url = self.sessions[current_session]['driver'].current_url
-        except urllib.error.URLError:
-            # logging.exception("")
-            logging.info("Old connection is not working any more")
-            send_alert("urllib.error.URLError: Previous Studio connection was killed!")
-            session_json.delete_session(current_session)
-            break
-        except selenium.common.exceptions.WebDriverException:
-            # logging.exception("")
-            logging.info("Browser was killed!")
-            send_alert("selenium.common.exceptions.WebDriverException: Previous Studio connection was killed!")
-            break
-        except:
-            # logging.exception("")
-            logging.info("Cannot get current url from browser, probably because it's not open!")
-            send_alert("Cannot get current url from browser, probably because it's not open!")
-            break
-            # if 'url' in self.sessions[current_session]:
-            #     self.connect_to_existing_driver()
-            #     break
-            # else:
-            #     self.create_new_driver()
-            #     break
-        if current_session_type == "studio_ue":
-          found_loading = re.search('localhost.*', url)
-          found_loaded = re.search('localhost.*main\?locale', url)
-        else:
-          found_loading = re.search('localhost.*\?sutoken', url)
-          found_loaded = re.search('localhost.*main\?locale', url)
-        # also need to check if the url matches the one specified in user settings
-        # if it matches but it cannot open probabaly the url in settings is not working
-        if found_loaded:
-            delay = 60
-            try:
-                logging.info("waiting for page to be loaded ......")
-                myElem = WebDriverWait(self.sessions[current_session]['driver'], delay).until(EC.presence_of_element_located((By.XPATH, self.sessions[current_session]['xpath_code_tab'])))
-                logging.info("Page is ready!")
-            except TimeoutException:
-                logging.info("Loading took too much time!")
-                send_alert("Loading took too much time!")
-                continue
-            if mode == "create":
-                if (current_session_type == "studio") & (self.platform != "osx"):
-                    submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
-                break
-
-            else:
-                submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
-                break
-
-        elif found_loading:
-            try:
-              url_code = urllib.request.urlopen(url).getcode()
-            except:
-              send_alert("Cannot connect to server, check if server is running or if you provide the correct link!")
-              return
-            time.sleep(2)
-        else:
-            self.sessions[current_session]['driver'].get(self.sessions[current_session]['studio_address'])
 
 
 ################################################################
@@ -370,16 +397,14 @@ try:
 
     while True:
         next_line = sys.stdin.readline()
-        logging.info("reading new line ... ...")
         if not next_line:
             break
-        logging.info(next_line)
         try:
             mode, session_name, command = eval(next_line)
             logging.info(mode)
-            logging.info(command.encode("ascii"))
+            logging.info("\n"+80*">"+"\n"+command.rstrip()+"\n"+80*"<")
             if mode == "create":
-                sessions.create_new_session(session_name)
+                sessions.create_new_session(session_name, command)
             if mode == "submit":
                 sessions.submit(command)
             if mode == "kill":
