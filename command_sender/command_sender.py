@@ -241,6 +241,7 @@ class SasSession:
 
   def studio_create_or_submit(self, mode, command=None):
     session_json = SessionInfo(json_path, default=False)
+    browser = session_json.get("browser")
     current_session = self.current_session
     current_session_type = self.sessions[current_session]['type']
 
@@ -286,7 +287,11 @@ class SasSession:
                 break
             if mode == "submit":
                 pid = session_json.settings["sessions"][self.current_session]['pid']
-                activate_window(pid = pid)
+                # activate_window function cannot activate firefox
+                if browser == "firefox":
+                  pass
+                else:
+                  activate_window(pid = pid)
                 submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
                 break
             else:
