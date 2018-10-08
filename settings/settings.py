@@ -14,7 +14,6 @@ class SessionInfo:
 			self.settings['root_path'] = ""
 			self.settings['sessions'] = {}
 			self.settings['current_session'] = ""
-			self.settings['error_msg'] = ""
 			self.settings['platform'] = sublime.platform()
 		else:
 			with open(self.path, "r") as f:

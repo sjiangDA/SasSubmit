@@ -5,7 +5,7 @@
     "log_timestamped": false,
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
-    "browser": "chrome",
+    "browser": "chrome", // choose from "chrome" and "ie"
 
 // following settings are for submitting to classic SAS
     // estimated time for SAS program to load

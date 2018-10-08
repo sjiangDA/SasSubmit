@@ -18,6 +18,7 @@ from Default.goto_line import GotoLineCommand
 ############################################################
 # Get environment variables
 package_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+print(100*"-")
 platform = sublime.platform()
 if platform == "windows":
     exe_path = os.path.join(package_path, "command_sender\\dist\\command_sender.exe")
@@ -35,6 +36,7 @@ logging.basicConfig(level=logging.DEBUG,
     filename=os.path.join(package_path, "command_initializer.log"),
     filemode="w")
 
+print(os.path.join(package_path, "command_initializer.log"))
 PATTERN = re.compile(r"""
     (?P<quote>["'])
     (?P<quoted_var>
@@ -88,8 +90,7 @@ def create_new_session(session, view):
     # warn existing users of the new version:
     update_warning = settings.get("update_warning_1810")
     if update_warning:
-        session_info.set("error_msg", "You have updated to the latest version of SasSubmit!\nIn this version the configuration of SAS keys has changed, please follow instructions on 'https://packagecontrol.io/packages/SasSubmit' to update your SAS configuration.\nTo disable this message, go to Perferences>Package Settings>SasSubmit>Settings and change 'update_warning_1810' to be false")
-        view.run_command("sas_submit_general_alert")
+        sublime.message_dialog("You have updated to the latest version of SasSubmit!\nIn this version the configuration of SAS keys has changed, please follow instructions on 'https://packagecontrol.io/packages/SasSubmit' to update your SAS configuration.\nTo disable this message, go to Perferences>Package Settings>SasSubmit>Settings and change 'update_warning_1810' to be false")
         return
 
     sessions_list = session_info.get("sessions")
@@ -99,8 +100,7 @@ def create_new_session(session, view):
     try:
         root_path = os.path.dirname(filepath)
     except:
-        session_info.set("error_msg", "Please open one file to start SAS session!")
-        view.run_command("sas_submit_general_alert")
+        sublime.message_dialog("Please open one file to start SAS session!")
         return
     session_info.set("current_session", current_session)
 
@@ -110,8 +110,9 @@ def create_new_session(session, view):
         timestr = ""
     session_info.set("root_path", root_path, current_session)
     # command = "\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
-    command = ["%s" % exe_path, "%s" % package_path]
-    logging.info(command)
+    command = "\"C:/Users/sjiang/AppData/Local/conda/conda/envs/py35/python\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
+    # command = ["%s" % exe_path, "%s" % package_path]
+    print(command)
     if "procs" in global_vars:
         pass
     else:
@@ -204,7 +205,7 @@ class SasSubmitCommand(sublime_plugin.TextCommand):
     def run(self, edit, cmd=None, prog=None, confirmation=None):
         session_info = SessionInfo(json_path, default=False)
         current_session = session_info.get("current_session")
-        logging.info("current_session is %s" % current_session)
+        print("current_session is %s" % current_session)
         if current_session:
             pass
         else:
@@ -267,8 +268,7 @@ class SasSubmitSetDirectoryCommand(sublime_plugin.TextCommand):
         try:
             root_path = os.path.dirname(filepath)
         except:
-            session_info.set("error_msg", "Please open one file to start SAS session!")
-            view.run_command("sas_submit_general_alert")
+            sublime.message_dialog("Please open one file to start SAS session!")
             return
         cmd = "x \'cd \"%s\"\';" % root_path
         sublime.set_clipboard(cmd.replace("\n", "\r\n"))
@@ -276,6 +276,9 @@ class SasSubmitSetDirectoryCommand(sublime_plugin.TextCommand):
 
 class SasSubmitGeneralAlertCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        session_info = SessionInfo(json_path, default=False)
-        error_msg = session_info.get("error_msg")
+        error_msg_lines = []
+        with open(os.path.join(package_path, ".error_msg.txt"), "r") as f:
+            for line in f:
+                error_msg_lines.append(line)
+        error_msg = "\n".join(error_msg_lines)
         sublime.message_dialog(error_msg)

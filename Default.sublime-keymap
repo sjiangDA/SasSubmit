@@ -6,6 +6,12 @@
         ]
     },
     {
+        "keys": ["ctrl+alt+a"], "command": "sas_submit_create_session",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.sas"}
+        ]
+    },
+    {
         "keys": ["ctrl+alt+s"], "command": "sas_submit_set_directory",
         "context": [
             { "key": "selector", "operator": "equal", "operand": "source.sas"}

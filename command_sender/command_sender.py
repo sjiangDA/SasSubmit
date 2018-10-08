@@ -13,7 +13,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 import psutil
 if os.name == "nt":
   import win32api
@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.INFO,
     filename=os.path.join(package_path, "command_sender.log"),
     filemode="w")
 logging.info(sys.version)
-logging.info(json_path)
+logging.info(package_path)
 logging.info("-------------------")
 logging.info(os.getcwd())
 
@@ -42,11 +42,14 @@ logging.info(os.getcwd())
 sys.path.append(package_path)
 from settings import SessionInfo
 
+session_json = SessionInfo(json_path, default=False)
+subl_path = session_json.get("subl_path")
 def send_alert(msg):
-  session_json = SessionInfo(json_path, default=False)
-  subl_path = session_json.get("subl_path")
-  session_json.set("error_msg", msg)
+  with open(os.path.join(package_path,".error_msg.txt"), "w") as f:
+    for line in msg:
+      f.write(line)
   _ = os.popen('\"%s\" --command "sas_submit_general_alert"' % subl_path)
+  time.sleep(1)
 
 def submit_to_studio(command, driver, platform, session_type="studio", paste=True):
   session_json = SessionInfo(json_path, default=False)
@@ -287,11 +290,7 @@ class SasSession:
                 break
             if mode == "submit":
                 pid = session_json.settings["sessions"][self.current_session]['pid']
-                # activate_window function cannot activate firefox
-                if browser == "firefox":
-                  pass
-                else:
-                  activate_window(pid = pid)
+                activate_window(pid = pid)
                 submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
                 break
             else:
@@ -315,8 +314,6 @@ class SasSession:
     if self.platform == "osx":
       if browser == "chrome":
         browserdriver = os.path.join(package_path, "binaries/chromedriver")
-      elif browser == "firefox":
-        browserdriver = os.path.join(package_path, "binaries/geckodriver")
       else:
         send_alert("Webdriver %s is not currently supported!" % browser)
     elif self.platform == "windows":
@@ -324,10 +321,9 @@ class SasSession:
         browserdriver = os.path.join(package_path, "binaries/IEDriverServer.exe")
       elif browser == "chrome":
         browserdriver = os.path.join(package_path, "binaries/chromedriver.exe")
-      elif browser == "firefox":
-        browserdriver = os.path.join(package_path, "binaries/geckodriver.exe")
       else:
         send_alert("Webdriver %s is not currently supported!" % browser)
+        return
     try:
       if browser == "ie":
         self.sessions[session_name]['driver'] = webdriver.Ie(browserdriver)
@@ -335,11 +331,10 @@ class SasSession:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-infobars")
         self.sessions[session_name]['driver'] = webdriver.Chrome(browserdriver, chrome_options=chrome_options)
-      elif browser == "firefox":
-        self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)
-    except:
+    except Exception as e:
       logging.exception("")
-      send_alert("Cannot start webdriver, check if 'chromedriver.exe' is in Sublime 'packages\\SasSubmit\\binaries\\' folder!")
+      send_alert(str(e))
+      return
     driver = self.sessions[session_name]['driver']
     self.sessions[session_name]["url"] = driver.command_executor._url
     self.sessions[session_name]["session_id"] = driver.session_id
