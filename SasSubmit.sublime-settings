@@ -21,9 +21,11 @@
     "xpath_clear_button": ".//*[@id='dijit_form_Button_12']/span[1]",
     // xpath of the code box field
     // "xpath_code_field": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]/div[2]",
-    "xpath_code_field": "//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/pre[1]/label",
+    "xpath_code_field": "//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/pre[1]/label/textarea",
     // xpath of the submit button
     "xpath_submit_button": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_submitBtn']/span[1]",
+    // xpath of the paste button
+    "xpath_paste_button": "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span",
 
 // following settings are for submitting to SAS studio university edition
     // address of SAS studio after starting up
@@ -37,4 +39,6 @@
     "xpath_code_field_ue": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]/div[2]",
     // xpath of the submit button
     "xpath_submit_button_ue": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_submitBtn']/span[1]",
+    // xpath of the paste button
+    "xpath_paste_button_ue": "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span",
 }

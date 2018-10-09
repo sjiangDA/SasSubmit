@@ -25,7 +25,7 @@ class SessionInfo:
 			"log_exclude", "studio_address", "xpath_code_tab", "xpath_clear_button", 
 			"xpath_code_field", "xpath_submit_button", "studio_address_ue", 
 			"xpath_code_tab_ue", "xpath_clear_button_ue", "xpath_code_field_ue", 
-			"xpath_submit_button_ue"]:
+			"xpath_submit_button_ue","xpath_paste_button_ue"]:
 			self.settings[key] = settings.get(key)
 	def save(self):
 		with open(self.path, "w") as f:

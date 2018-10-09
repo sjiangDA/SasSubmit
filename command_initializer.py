@@ -109,8 +109,8 @@ def create_new_session(session, view):
     else:
         timestr = ""
     session_info.set("root_path", root_path, current_session)
-    # command = "\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
-    command = "\"C:/Users/sjiang/AppData/Local/conda/conda/envs/py35/python\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
+    command = "\"C:/ProgramData/Anaconda2/envs/py35/python.exe\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
+    # command = "\"C:/Users/sjiang/AppData/Local/conda/conda/envs/py35/python\" -u \"%s\" \"%s\"" % (os.path.join(package_path, "command_sender\\command_sender.py"), package_path)
     # command = ["%s" % exe_path, "%s" % package_path]
     print(command)
     if "procs" in global_vars:

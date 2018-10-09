@@ -75,10 +75,17 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   driver.execute_script("arguments[0].click();", clear_button)
   # insert new code
   textfields = driver.find_elements_by_xpath(xpath_code_field)
+  if len(textfields) == 0:
+    textfields = driver.find_elements_by_xpath(".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]")
   if paste:
       if (platform == "windows") | (platform == "linux"):
+        try:
           driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.CONTROL, "v")
+        except:
+          logging.exception("")
+          send_alert("Submitting to %s encountered an error!" % session_type)
+          return
       elif platform == "osx":
           driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.SHIFT, Keys.INSERT)
@@ -174,7 +181,7 @@ def get_driver_pid(driver):
   if browserName == "internet explorer":
     pid = get_ie_pid(driver)
   else:
-    pid = driver.service.process.pid
+    pid =  psutil.Process(driver.service.process.pid).children()[0].pid
   return pid
 
 
@@ -270,7 +277,7 @@ class SasSession:
             break
 
         if current_session_type == "studio_ue":
-          found_loading = re.search('localhost.*', url)
+          found_loading = re.search('localhost.10080*', url)
           found_loaded = re.search('localhost.*main\?locale', url)
         else:
           found_loading = re.search('localhost.*\?sutoken', url)
@@ -314,6 +321,8 @@ class SasSession:
     if self.platform == "osx":
       if browser == "chrome":
         browserdriver = os.path.join(package_path, "binaries/chromedriver")
+      elif browser == "firefox":
+        browserdriver = os.path.join(package_path, "binaries/geckodriver")
       else:
         send_alert("Webdriver %s is not currently supported!" % browser)
     elif self.platform == "windows":
@@ -321,6 +330,8 @@ class SasSession:
         browserdriver = os.path.join(package_path, "binaries/IEDriverServer.exe")
       elif browser == "chrome":
         browserdriver = os.path.join(package_path, "binaries/chromedriver.exe")
+      elif browser == "firefox":
+        browserdriver = os.path.join(package_path, "binaries/geckodriver.exe")        
       else:
         send_alert("Webdriver %s is not currently supported!" % browser)
         return
@@ -331,6 +342,8 @@ class SasSession:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--disable-infobars")
         self.sessions[session_name]['driver'] = webdriver.Chrome(browserdriver, chrome_options=chrome_options)
+      elif browser == "firefox":
+        self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)        
     except Exception as e:
       logging.exception("")
       send_alert(str(e))

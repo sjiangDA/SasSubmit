@@ -15,7 +15,7 @@ This program currently supports submitting SAS command in:
 Only Windows operating system is supported at this moment. Supports for macos will be added in the future.
 
 # Installation
-Download this package and put into Sublime "packages\\" folder or install it using Sublime package control. The latest version of Google Chrome browser needs to be installed. The Sublime packge [`SAS Programming`](https://github.com/rpardee/sas) or [`SAS Syntax and Theme`](https://packagecontrol.io/packages/SAS%20Syntax%20and%20Theme) need to be installed prior to this package.
+Download this package and put into Sublime "packages\\" folder or install it using Sublime package control. The Sublime packge [`SAS Programming`](https://github.com/rpardee/sas) or [`SAS Syntax and Theme`](https://packagecontrol.io/packages/SAS%20Syntax%20and%20Theme) need to be installed prior to this package.
 
 ## Basic setup
 * Make a copy of the SasSubmit.sublime-settings and put it into Sublime "Packages/User/" folder. Or open the menu "Preferences/Pacakge Settings/SasSubmit/Settings", then copy from the default settings and paste into the user settings. Make changes only to the user settings.
@@ -47,19 +47,22 @@ Download this package and put into Sublime "packages\\" folder or install it usi
 * SAS studio do not need to be installed on your local computer. You can remotely connect to a computer running SAS studio via port forwarding.
 
 # Usage
-* Open command Platte and type in `create session`. 
+* Open command Platte and type in `create session`, or press `ctrl+alt+s`. 
 * On the lower screen find the "Session to Create:" box, and type in the session you want to create. If you type anything else it would fail.
     -  "studio" stands for SAS studio
     -  "studio_ue" stands for SAS studio university edition
     -  "classic" stands for the traditionally used SAS program
 * You can create multiple sessions for each type of session. Specifically for "classic" session, 
     - if you type "classic" in the "create session" prompt, it will create a "classic:default" session. For "classic:default" session, SasSubmit will submit SAS command to the most recently activated SAS window.
-    - if you type "classic:XXXXX", where "XXXXX" is not "default", for example, "classic:project_1", it will create a "classic:XXXXX" session. These types of session is not the same as "classic:default" as the location of your SAS program will be remembered in these sessions.
+    - if you type "classic:XXXXX", where "XXXXX" is not "default", for example, "classic:project_1", it will create a named classic session, with "XXXXX" being the name, from the location of your SAS program. These types of session is not the same as "classic:default" as the pid of SAS window will be remembered in these sessions.
+    - if you type "classic:" you will create a named classic session while the name is the time when you create this session. 
 * Wait for the session to be created. 
 * When the session is ready submit code using `F3`.
+* You can change the directory of SAS session to the location of SAS program by pressing `ctrl+alt+d`.
 * Keep your Sublime application running, otherwise the connection between sublime and all existing sessions will be broken. Also keep the Chrome window open by the session open, otherwise that session would be killed.
 * You can create multiple sessions, and you can also switch to different sessions by opening command Platte and type in "choose session".
 
-# Debug
-This plugin is still in the alpha stage and I haven't tested thoroughly. If you have problem such as session cannot be created or submitting does not work, please first read Sublime "Packages/SasSubmit/SasSubmit.log"or submit an issue. 
-Push is welcome!
+# FAQ
+**Q: SAS studio is always loading using Chrome as the browser**
+
+A: Please refer to this page https://communities.sas.com/t5/SAS-Studio/Issue-with-SAS-Studio-on-Chrome-v67/td-p/466242
