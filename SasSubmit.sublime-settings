@@ -7,10 +7,6 @@
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
     "browser": "chrome", // choose from "chrome" and "ie"
 
-// following settings are for submitting to classic SAS
-    // estimated time for SAS program to load
-    "loading_time": 4,
-
 // following settings are for submitting to SAS 
     // address of SAS studio after starting up
     // the last three digits number is typically SAS studio version

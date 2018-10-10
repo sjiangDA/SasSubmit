@@ -365,7 +365,6 @@ class SasSession:
 
     logging.info("Creating sas classic ... ...")
     session_json = SessionInfo(json_path, default=False)
-    loading_time = session_json.get("loading_time")
     sas_path = session_json.get("sas_path")
     if not os.path.isfile(sas_path):
       send_alert("SAS path incorrect!")
