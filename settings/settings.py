@@ -24,7 +24,7 @@ class SessionInfo:
 
 	def load_default(self):
 		settings = sublime.load_settings("SasSubmit.sublime-settings")
-		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser"
+		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser",
 			"log_exclude", "studio_address", "studio_address_ue"]:
 			self.settings[key] = settings.get(key)
 	def save(self):
