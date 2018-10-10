@@ -1,0 +1,12 @@
+{
+    "xpath_code_tab"        : ".//*[@id='perspectiveTabContainer_tabsBC_tab0sasSuiteTabContainer_tablist_perspectiveTabContainer_tabsBC_tab0editor']",
+    "xpath_clear_button"    : ".//*[@id='dijit_form_Button_12']/span[1]",
+    "xpath_code_field"      : "//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/pre[1]/label/textarea",
+    "xpath_submit_button"   : ".//*[@id='perspectiveTabContainer_tabsBC_tab0_submitBtn']/span[1]",
+    "xpath_paste_button"    : "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span",
+    "xpath_code_tab_ue"     : ".//*[@id='perspectiveTabContainer_tabsBC_tab0sasSuiteTabContainer_tablist_perspectiveTabContainer_tabsBC_tab0editor']",
+    "xpath_clear_button_ue" : ".//*[@id='dijit_form_Button_12']/span[1]",
+    "xpath_code_field_ue"   : ".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]/div[2]",
+    "xpath_submit_button_ue": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_submitBtn']/span[1]",
+    "xpath_paste_button_ue" : "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span"
+}

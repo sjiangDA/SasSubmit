@@ -11,6 +11,9 @@ class SessionInfo:
 		if default:
 			self.settings = {}
 			self.load_default()
+			xpath_json = json.loads(open(os.path.join(os.path.dirname(self.path), "settings\\driver_settings.json")).read())
+			for key in xpath_json.keys():
+				self.settings[key] = xpath_json[key]
 			self.settings['root_path'] = ""
 			self.settings['sessions'] = {}
 			self.settings['current_session'] = ""
@@ -22,10 +25,7 @@ class SessionInfo:
 	def load_default(self):
 		settings = sublime.load_settings("SasSubmit.sublime-settings")
 		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser", "loading_time", 
-			"log_exclude", "studio_address", "xpath_code_tab", "xpath_clear_button", 
-			"xpath_code_field", "xpath_submit_button", "studio_address_ue", 
-			"xpath_code_tab_ue", "xpath_clear_button_ue", "xpath_code_field_ue", 
-			"xpath_submit_button_ue","xpath_paste_button_ue"]:
+			"log_exclude", "studio_address", "studio_address_ue"]:
 			self.settings[key] = settings.get(key)
 	def save(self):
 		with open(self.path, "w") as f:

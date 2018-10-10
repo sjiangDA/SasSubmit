@@ -11,7 +11,7 @@ code_sender*
 .RemoteSasSubmit\
 *.pyc
 things_to_do.md
-*.json
+settings_session.json
 .DS_Store
 *.spec
 .clipboard
