@@ -64,6 +64,9 @@ Download this package and put into Sublime "packages\\" folder or install it usi
 * Having too much content in SAS can make SAS running slow. In SAS you can assign the key `ALT F12` as `"log; clear; output; winclose; odsResults; clear;"`. So When you have too many results, you can press `ALT F12` in SAS to clean the results and make it running faster.
 
 # FAQs
-**Q: SAS studio is always loading using Chrome as the browser**
 
+**Q: I see this error message when I create a new session: "You have updated to the latest version of SasSubmit! In this version ..."**
+A: As indicated by the error message, you need go to *Perferences>Package Settings>SasSubmit>Settings* and change 'update_warning_1810' to be false.
+
+**Q: SAS studio is always loading using Chrome as the browser**
 A: Please refer to this page https://communities.sas.com/t5/SAS-Studio/Issue-with-SAS-Studio-on-Chrome-v67/td-p/466242
