@@ -104,7 +104,8 @@ def submit_to_classic():
   driver = comclt.Dispatch("WScript.Shell")
   win32api.Sleep(500)
   driver.SendKeys("{F4}")
-  win32api.Sleep(1000)
+  win32api.Sleep(500)
+  _ = os.popen('\"%s\" --command "sas_submit_activate"' % subl_path)
 
 def get_type_from_session_name(session):
   session_name = session.split(":")[0]

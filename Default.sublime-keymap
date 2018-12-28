@@ -16,5 +16,11 @@
         "context": [
             { "key": "selector", "operator": "equal", "operand": "source.sas"}
         ]
+    },
+    {
+        "keys": ["f4"], "command": "sas_submit_paragraph",
+        "context": [
+            { "key": "selector", "operator": "equal", "operand": "source.sas"}
+        ]
     }
 ]
