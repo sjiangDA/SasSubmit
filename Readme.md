@@ -1,8 +1,5 @@
-# IMPORTANT CHANGES!!!
-Note to EXISTING users:
-In the current version, I have changed the keys in SAS for submission from "F1" to "F4". After this change, the "Help" window will not pop up when SAS Enhanced Editor is open. Please change in your SAS by editing "F4" to be "log; gsubmit buf = default". You can keep "F1" configuration as it were or whatever you want it to be.
-
-For new users, please follow the steps in the installation section.
+# New updates
+* In this new version, instead of submiting line by line using `F3`, you can also submit a whole data or proc step by pressing `F4`!
 
 # Descriptions
 This program currently supports submitting SAS command in:
@@ -57,17 +54,13 @@ Download this package and put into Sublime "packages\\" folder or install it usi
     - if you type "classic:XXXXX", where "XXXXX" is not "default", for example, "classic:project_1", it will create a named classic session, with "XXXXX" being the name, from the location of your SAS program. These types of session is not the same as "classic:default" as the pid of SAS window will be remembered in these sessions.
     - if you type "classic:" you will create a named classic session while the name is the time when you create this session. 
 * Wait for the session to be created. 
-* When the session is ready submit code using `F3`.
+* When the session is ready submit code using `F3` or `F4`.
 * You can change the directory of SAS session to the location of SAS program by pressing `ctrl+alt+d`.
 * Keep your Sublime application running, otherwise the connection between sublime and all existing sessions will be broken. Also keep the browser window opened by the session open, otherwise that session would be killed. 
 * You can create multiple sessions, and you can also switch to different sessions by opening command Platte and type in "choose session".
 * Having too much content in SAS can make SAS running slow. In SAS you can assign the key `ALT F12` as `"log; clear; output; winclose; odsResults; clear;"`. So When you have too many results, you can press `ALT F12` in SAS to clean the results and make it running faster.
 
 # FAQs
-
-**Q: I see this error message when I create a new session: "You have updated to the latest version of SasSubmit! In this version ..."**
-
-A: As indicated by the error message, you need go to *Perferences>Package Settings>SasSubmit>Settings* and change 'update_warning_1810' to be false.
 
 **Q: SAS studio is always loading using Chrome as the browser**
 
