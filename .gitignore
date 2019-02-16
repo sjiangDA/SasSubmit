@@ -16,3 +16,4 @@ settings_session.json
 *.spec
 .clipboard
 .error_msg.txt
+sync.ffs_db

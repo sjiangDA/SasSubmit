@@ -102,9 +102,12 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
 
 def submit_to_classic():
   driver = comclt.Dispatch("WScript.Shell")
-  win32api.Sleep(500)
+  time.sleep(0.1)
+  driver.SendKeys("%W")
+  time.sleep(0.1)
+  driver.SendKeys("2")
+  time.sleep(0.1)
   driver.SendKeys("{F4}")
-  win32api.Sleep(500)
   _ = os.popen('\"%s\" --command "sas_submit_activate"' % subl_path)
 
 def get_type_from_session_name(session):
@@ -133,18 +136,22 @@ def find_sas_pid():
 
 
 def activate_window(path="", pid=0):
-    if pid > 0:
+    try:
+      if pid > 0:
         app = Application().connect(process=pid)
-    else:
+      else:
         app = Application().connect(title="SAS", found_index=0)
-    w = app.top_window()
-
-    #bring window into foreground
-    if w.has_style(win32defines.WS_MINIMIZE): # if minimized
-        ShowWindow(w.wrapper_object(), 9) # restore window state
-    else:
-        SetForegroundWindow(w.wrapper_object()) #bring to front
-
+      w = app.top_window()
+      #bring window into foreground
+      if w.has_style(win32defines.WS_MINIMIZE): # if minimized
+          ShowWindow(w.wrapper_object(), 9) # restore window state
+      else:
+          SetForegroundWindow(w.wrapper_object()) #bring to front
+      w.set_focus()
+      return 0
+    except:
+      logging.info("...... error found ...........")
+      return 1
 #-------------------------------------------------
 # Define functions to find webdriver pid         -
 #-------------------------------------------------
@@ -298,7 +305,7 @@ class SasSession:
                 break
             if mode == "submit":
                 pid = session_json.settings["sessions"][self.current_session]['pid']
-                activate_window(pid = pid)
+                _ = activate_window(pid = pid)
                 submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
                 break
             else:
@@ -371,6 +378,16 @@ class SasSession:
       send_alert("SAS path incorrect!")
       return
     proc = subprocess.Popen('\"%s\" -rsasuser -sasinitialfolder = \"%s\"' % (sas_path, self.sessions[self.current_session]['root_path']))
+    pid = proc.pid
+    while True:
+      try:
+        app = Application().connect(process=pid)
+        print(len(app.windows()))
+        if len(app.windows()) > 15:
+          break
+      except:
+        pass
+      time.sleep(0.1)
     session_json.set("pid", proc.pid, self.current_session)
 
   def classic_submit(self):
@@ -378,27 +395,36 @@ class SasSession:
     session_json = SessionInfo(json_path, default=False)
 
     logging.info("Submitting to sas classic ... ...")
-    active_sas_pids = find_sas_pid()
+    # active_sas_pids = find_sas_pid()
+    # if session_is_default:
+    #   if len(active_sas_pids) == 0:
+    #     self.classic_create()
+    #   else:
+    #     activate_window(path=self.sas_path)
+    #     submit_to_classic()
+    # else:
+    #   logging.info("submitting to non-default sas session")
+    #   pid = session_json.settings["sessions"][self.current_session]['pid']
+    #   if pid in active_sas_pids:
+    #     pass
+    #   else:
+    #     session_json.delete_session(self.current_session)
+    #     send_alert("The requested session is not current running!")
+    #     return
+    #   activate_window(pid=pid)
+    #   submit_to_classic()
+
     if session_is_default:
-      if len(active_sas_pids) == 0:
+      if activate_window(path=self.sas_path):
         self.classic_create()
-      else:
-        activate_window(path=self.sas_path)
-        submit_to_classic()
+      submit_to_classic()
     else:
       logging.info("submitting to non-default sas session")
       pid = session_json.settings["sessions"][self.current_session]['pid']
-      if pid in active_sas_pids:
-        pass
-      else:
-        session_json.delete_session(self.current_session)
+      if activate_window(pid=pid):
         send_alert("The requested session is not current running!")
-        return
-      activate_window(pid=pid)
-      submit_to_classic()
-
-
-
+      else:
+        submit_to_classic()
 
 ################################################################
 # Using loop to read code send from sublime                    #
