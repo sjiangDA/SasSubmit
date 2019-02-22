@@ -14,11 +14,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import psutil
 if os.name == "nt":
   import win32api
   import win32com.client as comclt
-  import win32gui
   from pywinauto import Application, win32defines
   from pywinauto.win32functions import SetForegroundWindow, ShowWindow
 
@@ -69,17 +70,21 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
   logging.info("Submitting code to sas ... ...")
   # go to the code tab
   code_tab_button = driver.find_element_by_xpath(xpath_code_tab)
+  time.sleep(0.01)
   driver.execute_script("arguments[0].click();", code_tab_button)
   # clear code frame
   clear_button = driver.find_element_by_xpath(xpath_clear_button)
+  time.sleep(0.01)
   driver.execute_script("arguments[0].click();", clear_button)
   # insert new code
   textfields = driver.find_elements_by_xpath(xpath_code_field)
+  time.sleep(0.01)
   if len(textfields) == 0:
     textfields = driver.find_elements_by_xpath(".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]")
   if paste:
       if (platform == "windows") | (platform == "linux"):
         try:
+          time.sleep(0.1)
           driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.CONTROL, "v")
         except:
@@ -87,18 +92,23 @@ def submit_to_studio(command, driver, platform, session_type="studio", paste=Tru
           send_alert("Submitting to %s encountered an error!" % session_type)
           return
       elif platform == "osx":
+          time.sleep(0.01)
           driver.execute_script("arguments[0].click();", textfields[0])
           textfields[0].send_keys(Keys.SHIFT, Keys.INSERT)
   else:
       logging.info("sending command %s" % command)
+      time.sleep(0.01)
       command = re.sub("\n\t+", "\n", command)
       textfields[0].send_keys(command)
   # submit
   logging.info("submitting.....")
   # textfields[0].send_keys(Keys.CONTROL, 'a')
   submit_button = driver.find_element_by_xpath(xpath_submit_button)
+  time.sleep(0.1)
   driver.execute_script("arguments[0].click();", submit_button)
   # textfields[0].send_keys(Keys.F3)
+  time.sleep(0.01)
+  _ = os.popen('\"%s\" --command "sas_submit_activate"' % subl_path)
 
 def submit_to_classic():
   driver = comclt.Dispatch("WScript.Shell")
@@ -308,6 +318,11 @@ class SasSession:
                 _ = activate_window(pid = pid)
                 submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
                 break
+            elif mode == "create":
+              logging.info("submitting in create mode")
+              logging.info(command)
+              submit_to_studio(command, self.sessions[current_session]['driver'], self.platform, current_session_type)
+              break
             else:
               break
 
@@ -351,7 +366,18 @@ class SasSession:
         chrome_options.add_argument("--disable-infobars")
         self.sessions[session_name]['driver'] = webdriver.Chrome(browserdriver, chrome_options=chrome_options)
       elif browser == "firefox":
-        self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)        
+        # self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)
+        binary = FirefoxBinary(session_json.get("browser_path"))
+        cap = DesiredCapabilities().FIREFOX
+        cap["marionette"] = True
+        self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver, firefox_binary=binary, capabilities=cap)
+        # try:
+        #   self.sessions[session_name]['driver'] = webdriver.Firefox(capabilities=cap, executable_path=browserdriver)
+        # except FileNotFoundError:
+        #   logging.info("file not found")
+        #   # self.sessions[session_name]['driver'] = webdriver.Firefox(capabilities=cap, executable_path=browserdriver, firefox_binary=binary)
+        #   self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver, firefox_binary=binary)
+
     except Exception as e:
       logging.exception("")
       send_alert(str(e))

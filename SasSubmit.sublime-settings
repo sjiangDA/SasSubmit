@@ -1,11 +1,11 @@
 {
-    "update_warning_1810": true,
     "default_session": "classic",
     // if add time stamp to log file name: if true, will create a new log every time creating a new session
     "log_timestamped": false,
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
     "browser": "chrome", // choose from "chrome" and "ie"
+    "browser_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
 
 // following settings are for submitting to SAS 
     // address of SAS studio after starting up
