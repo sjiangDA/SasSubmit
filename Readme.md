@@ -32,12 +32,12 @@ Download this package and put into Sublime "packages\\" folder or install it usi
         </p>
 
 ## SAS studio university edition
-* Start SAS studio university edition (please update your program to the lastest version to make working with Google Chrome).
+* Start SAS studio university edition.
 ![SAS studio university edition start](figures/studio_ue_open.png)
 * Open the link [http://localhost:10080](http://localhost:10080) in your browser
 * Click on the link to start SAS studio.
 * The link changes to the format like "http://localhost:10080/SASStudio/371/". Change the settings `studio_address_ue` to this link because it directly link to your SAS studio.
-* If you prefer using a browser other than Chrome, you can change the settings `browser` to be either "ie" (Internet explorer) or "firefox" (Firefox). Before you do that, make sure you download the compatible webdriver executable and put it into the `SasSubmit\binaries` folder. For 'ie', it can be downloaded from [here](http://selenium-release.storage.googleapis.com/3.9/IEDriverServer_Win32_3.9.0.zip) if you are using 32 bit IE, or [here](http://selenium-release.storage.googleapis.com/3.9/IEDriverServer_x64_3.9.0.zip) if you are using 64 bit IE. For 'firefox', it can be downloaded from [here](https://github.com/mozilla/geckodriver/releases). You need unzip the downloaded file first and put only the `.exe` file into the `binary` folder.
+* Choose your preferred browser by changing the settings `browser` to be either "ie" (Internet explorer) or "firefox" (Firefox) or "chrome" (Google Chrome). 
 
 ## SAS studio
 * Start SAS studio installed with SAS 9.4. It should open a page in your default browser. The link of the web page is in the format of `http://localhost:####/?sutoken=***************************************`, where `####` is a port number and `***************************************` is the token of you SAS studio. Change `studio_address` in settings to be this link.

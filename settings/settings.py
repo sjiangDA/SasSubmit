@@ -29,7 +29,6 @@ class SessionInfo:
 			"log_exclude", "studio_address", "studio_address_ue"]:
 			self.settings[key] = settings.get(key)
 
-		self.settings['browser_path'] = settings.get(settings.get("browser")+"_path")
 	def save(self):
 		with open(self.path, "w") as f:
 			json.dump(self.settings, f, sort_keys=True, indent=4)

@@ -367,7 +367,7 @@ class SasSession:
         self.sessions[session_name]['driver'] = webdriver.Chrome(browserdriver, chrome_options=chrome_options)
       elif browser == "firefox":
         # self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver)
-        binary = FirefoxBinary(session_json.get("browser_path"))
+        binary = FirefoxBinary(session_json.get("firefox_path"))
         cap = DesiredCapabilities().FIREFOX
         cap["marionette"] = True
         self.sessions[session_name]['driver'] = webdriver.Firefox(executable_path=browserdriver, firefox_binary=binary, capabilities=cap)

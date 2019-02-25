@@ -4,7 +4,7 @@
     "log_timestamped": false,
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
-    "browser": "chrome", // choose from "chrome" and "ie"
+    "browser": "firefox", // choose from "chrome", "ie", "firefox"
     "firefox_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
     "firefox_bit": 64,
     "ie_path": "",

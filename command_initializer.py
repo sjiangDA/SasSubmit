@@ -73,11 +73,8 @@ session_info.save()
 
 def check_driver_or_download():
     platform = sublime.platform()
-    logging.info(platform)
     browser = session_info.get("browser")
-    logging.info(browser)
     browser_bit = session_info.get(browser+"_bit")
-    logging.info(browser_bit)
     if platform == "windows":
         if browser == "ie":
             browser_driver = "IEDriverServer.exe"
@@ -86,19 +83,12 @@ def check_driver_or_download():
         elif browser == "firefox":
             browser_driver = "geckodriver.exe"
     if os.path.isfile(os.path.join(package_path,"binaries",browser_driver)):
-        logging.info("------------------------------")
-        logging.info("file exist!")
         pass
     else:
-        logging.info("------------------------------")
-        logging.info("file not exist!")
         url = session_info.get(platform+"_driver_"+browser+"_url_"+str(browser_bit))
         urllib.request.urlretrieve(url, os.path.join(package_path,'binaries\\driver.zip'))
         with zipfile.ZipFile(os.path.join(package_path,"binaries","driver.zip"),"r") as zip_ref:
             zip_ref.extractall(os.path.join(package_path,"binaries"))
-
-
-
 
 ############################################################
 # Define help functions
@@ -113,7 +103,6 @@ def escape_squote(cmd):
     cmd = cmd.replace('\\', '\\\\')
     cmd = cmd.replace("\'", "\'")
     return cmd
-
 
 def send_command_to_sas(mode, session_name, command):
     try:
