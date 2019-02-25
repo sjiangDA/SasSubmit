@@ -5,7 +5,12 @@
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
     "browser": "chrome", // choose from "chrome" and "ie"
-    "browser_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
+    "firefox_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
+    "firefox_bit": 64,
+    "ie_path": "",
+    "ie_bit": 64,
+    "chrome_path": "",
+    "chrome_bit": 64,
 
 // following settings are for submitting to SAS 
     // address of SAS studio after starting up

@@ -24,9 +24,12 @@ class SessionInfo:
 
 	def load_default(self):
 		settings = sublime.load_settings("SasSubmit.sublime-settings")
-		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser", "browser_path",
+		for key in ["default_session", "log_timestamped", "subl_path", "sas_path", "browser", 
+			"firefox_path","firefox_bit","chrome_path","chrome_bit","ie_path","ie_bit",
 			"log_exclude", "studio_address", "studio_address_ue"]:
 			self.settings[key] = settings.get(key)
+
+		self.settings['browser_path'] = settings.get(settings.get("browser")+"_path")
 	def save(self):
 		with open(self.path, "w") as f:
 			json.dump(self.settings, f, sort_keys=True, indent=4)

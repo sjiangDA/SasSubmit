@@ -9,6 +9,9 @@ import threading
 import json
 import logging
 import sys
+import urllib.request
+import zipfile
+
 # from Default.goto_line import GotoLineCommand
 
 
@@ -67,6 +70,33 @@ global_vars = {}
 # Initialize session information
 session_info = SessionInfo(json_path, default=True)
 session_info.save()
+
+def check_driver_or_download():
+    platform = sublime.platform()
+    logging.info(platform)
+    browser = session_info.get("browser")
+    logging.info(browser)
+    browser_bit = session_info.get(browser+"_bit")
+    logging.info(browser_bit)
+    if platform == "windows":
+        if browser == "ie":
+            browser_driver = "IEDriverServer.exe"
+        elif browser == "chrome":
+            browser_driver = "chromedriver.exe"
+        elif browser == "firefox":
+            browser_driver = "geckodriver.exe"
+    if os.path.isfile(os.path.join(package_path,"binaries",browser_driver)):
+        logging.info("------------------------------")
+        logging.info("file exist!")
+        pass
+    else:
+        logging.info("------------------------------")
+        logging.info("file not exist!")
+        url = session_info.get(platform+"_driver_"+browser+"_url_"+str(browser_bit))
+        urllib.request.urlretrieve(url, os.path.join(package_path,'binaries\\driver.zip'))
+        with zipfile.ZipFile(os.path.join(package_path,"binaries","driver.zip"),"r") as zip_ref:
+            zip_ref.extractall(os.path.join(package_path,"binaries"))
+
 
 
 
@@ -161,6 +191,8 @@ class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
             if (sublime.platform() == "osx") & (session_name not in ["studio", "studio_ue"]):
                 sublime.error_message("Session %s was not supported on osx platform!" % session)
                 return
+            if session_name in ['studio','studio_ue']:
+                check_driver_or_download()
             create_new_session(session, self.view)
 
         def on_change(input_string):

@@ -8,5 +8,11 @@
     "xpath_clear_button_ue" : ".//*[@id='dijit_form_Button_12']/span[1]",
     "xpath_code_field_ue"   : ".//*[@id='perspectiveTabContainer_tabsBC_tab0_editor']/div/div[7]/div[2]",
     "xpath_submit_button_ue": ".//*[@id='perspectiveTabContainer_tabsBC_tab0_submitBtn']/span[1]",
-    "xpath_paste_button_ue" : "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span"
+    "xpath_paste_button_ue" : "//*[@id='perspectiveTabContainer_tabsBC_tab0_toolbar']/span[13]/span",
+    "windows_driver_firefox_url_32": "https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-win32.zip",
+    "windows_driver_firefox_url_64": "https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-win64.zip",
+    "windows_driver_ie_url_32": "https://selenium-release.storage.googleapis.com/3.9/IEDriverServer_Win32_3.9.0.zip",
+    "windows_driver_ie_url_64": "https://selenium-release.storage.googleapis.com/3.9/IEDriverServer_x64_3.9.0.zip",
+    "windows_driver_chrome_url_32": "https://chromedriver.storage.googleapis.com/2.46/chromedriver_win32.zip",
+    "windows_driver_chrome_url_64": "https://chromedriver.storage.googleapis.com/2.46/chromedriver_win32.zip"
 }
