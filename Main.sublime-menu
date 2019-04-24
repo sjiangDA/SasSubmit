@@ -15,8 +15,8 @@
                             {
                                 "command": "edit_settings",
                                 "args": {
-                                    "base_file": "${packages}/SasSubmit/SasSubmit.sublime-settings",
-                                    "user_file": "${packages}/User/SasSubmit.sublime-settings"
+                                    "base_file": "${packages}/SasSubmit/SasSubmit (${platform}).sublime-settings",
+                                    "user_file": "${packages}/User/SasSubmit (${platform}).sublime-settings"
                                 },
                                 "caption": "Settings"
                             },

@@ -1,0 +1,17 @@
+{
+    "default_session": "classic",
+    "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
+    "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
+    "browser": "firefox", // choose from "chrome", "ie", "firefox"
+    "firefox_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
+    "ie_path": "C:\\Program Files\\internet explorer\\iexplore.exe",
+    "chrome_path": "",
+    "activate_subl_after_submit": true,
+
+// following settings are for submitting to SAS 
+    // address of SAS studio after starting up
+    // the last three digits number is typically SAS studio version
+    "studio_address": "http://localhost:####/?sutoken=***********************************************",
+    // if submit to SAS studio university edition then use the address similar like this:
+    // "studio_address": "http://localhost:10080/SASStudio/371/",
+}

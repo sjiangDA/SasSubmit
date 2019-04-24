@@ -1,0 +1,7 @@
+{
+    // if add time stamp to log file name: if true, will create a new log every time creating a new session
+    "browser": "firefox", // choose from "chrome", "safari", "firefox"
+
+    // address of SAS studio after starting up
+    "studio_address": "http://localhost:####/?sutoken=***********************************************",
+}
