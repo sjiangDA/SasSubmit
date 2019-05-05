@@ -23,22 +23,18 @@ def submit_to_studio(browser):
   stdout, stderr = p.communicate(scpt)
 
 
-def create_new_studio(browser):
+def create_new_studio(browser, link):
   scpt = '''
   set currentApp to path to frontmost application
-  activate application "%s"
   delay 0.1
-  tell application "System Events"
-    keystroke "t" using command down
-    delay 0.1
-    keystroke "l" using command down
+  tell application "%s"
+    activate
+    open location "%s"
     delay 1
-    keystroke "v" using command down
-    delay 1
-    key code 36
   end tell
   activate currentApp
-  ''' % (browser)
+  ''' % (browser, link)
+  print(scpt)
   p = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
   stdout, stderr = p.communicate(scpt)
 
@@ -49,12 +45,13 @@ class SessionWrapper:
   def update_info(self):
     session_json = SessionInfo()
     self.browser = standardize_browser_name(session_json.get("browser"))
+    self.link = session_json.get("studio_address")
   def new(self, session_name, root_path):
     self.update_info()
-    create_new_studio(self.browser)
+    create_new_studio(self.browser, self.link)
   def activate(self):
     pass
-  def submit(self, session_name):
+  def submit(self, session_name, root_path):
     self.update_info()
     submit_to_studio(self.browser)
   def kill(self):

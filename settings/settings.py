@@ -3,7 +3,7 @@ import os
 import sublime
 if sublime.platform() == "osx":
 	acceptable_browsers = ['chrome','safari']
-	setting_keys = ["subl_path","browser","studio_address"]
+	setting_keys = ["browser","studio_address"]
 else:
 	acceptable_browsers = ['chrome','ie','firefox']
 	setting_keys = ["default_session","subl_path","sas_path","browser","firefox_path","chrome_path","ie_path","studio_address"]
