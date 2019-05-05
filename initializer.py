@@ -74,6 +74,8 @@ def run_submit_command(view):
     try:
         if current_session:
             pass
+        elif sublime.platform() == "osx":
+            pass
         else:
             raise Exception("")
         if current_session in session_info.settings['sessions']:

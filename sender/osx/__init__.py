@@ -44,6 +44,7 @@ class SessionWrapper:
     pass
   def update_info(self):
     session_json = SessionInfo()
+    session_json.set("current_session", "studio")
     self.browser = standardize_browser_name(session_json.get("browser"))
     self.link = session_json.get("studio_address")
   def new(self, session_name, root_path):
