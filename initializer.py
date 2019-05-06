@@ -80,7 +80,7 @@ def run_submit_command(view):
             raise Exception("")
         if current_session in session_info.settings['sessions']:
             pass
-        elif sublime.platform() == "osx":
+        elif current_session == "studio":
             pass
         else:
             raise Exception("")

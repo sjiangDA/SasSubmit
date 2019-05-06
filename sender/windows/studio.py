@@ -86,6 +86,7 @@ class StudioSession:
 
   def new_instance(self, instance, root_path):
     self.update_session_info()
+    self.meta.new("studio")
     self.new_browser()
 
   def submit_to_broswer(self):

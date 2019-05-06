@@ -2,10 +2,10 @@
     "default_session": "classic",
     "subl_path": "C:\\Program Files\\Sublime Text 3\\subl.exe",
     "sas_path": "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe",
-    "browser": "firefox", // choose from "chrome", "ie", "firefox"
+    "browser": "chrome", // choose from "chrome", "ie", "firefox"
     "firefox_path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe", // path of browser executable
     "ie_path": "C:\\Program Files\\internet explorer\\iexplore.exe",
-    "chrome_path": "",
+    "chrome_path": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
     "activate_subl_after_submit": true,
 
 // following settings are for submitting to SAS 
