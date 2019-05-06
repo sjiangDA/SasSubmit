@@ -35,7 +35,6 @@ def parse_session_name(string):
 
 
 def move_cursor_to_next(view):
-    print("moving cursor to next")
     sel = [s for s in view.sel()][0]
     if len(sel) > 0:
         right_after = sel.end() + 1

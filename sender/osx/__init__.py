@@ -18,7 +18,6 @@ def submit_to_studio(browser):
     script_file = "chrome_submit.applescript"
   with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),script_file),"r") as f:
     scpt = f.read()
-  print(scpt)
   p = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
   stdout, stderr = p.communicate(scpt)
 
@@ -34,7 +33,6 @@ def create_new_studio(browser, link):
   end tell
   activate currentApp
   ''' % (browser, link)
-  print(scpt)
   p = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
   stdout, stderr = p.communicate(scpt)
 

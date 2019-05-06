@@ -7,15 +7,12 @@ This program currently supports submitting SAS command in:
     ![Submit to local](figures/submit_to_classic.gif)
 * **'studio' mode**: Submitting SAS command to SAS studio running in browser
     ![Submit to studio](figures/submit_to_studio.gif)
-* **'studio_ue' mode**: Submitting SAS command to SAS studio university edition running in browser
-
-Only Windows operating system is supported at this moment. Supports for macos will be added in the future.
 
 # Installation
 Download this package and put into Sublime "packages\\" folder or install it using Sublime package control. The Sublime packge [`SAS Programming`](https://packagecontrol.io/packages/SAS%20Programming) or [`SAS Syntax and Theme`](https://packagecontrol.io/packages/SAS%20Syntax%20and%20Theme) need to be installed prior to this package.
 
 ## Basic setup
-* Make a copy of the SasSubmit.sublime-settings and put it into Sublime "Packages/User/" folder. Or open the menu "Preferences/Pacakge Settings/SasSubmit/Settings", then copy from the default settings and paste into the user settings. Make changes only to the user settings.
+* Open the menu "Preferences/Pacakge Settings/SasSubmit/Settings". Make changes only to the user settings.
 
 ## Classic mode
 * Configure SAS, this only need to be done once.
@@ -36,7 +33,7 @@ Download this package and put into Sublime "packages\\" folder or install it usi
 ![SAS studio university edition start](figures/studio_ue_open.png)
 * Open the link [http://localhost:10080](http://localhost:10080) in your browser
 * Click on the link to start SAS studio.
-* The link changes to the format like "http://localhost:10080/SASStudio/371/". Change the settings `studio_address_ue` to this link because it directly link to your SAS studio.
+* The link changes to the format like "http://localhost:10080/SASStudio/371/". Change the settings `studio_address` to this link because it directly link to your SAS studio.
 * Choose your preferred browser by changing the settings `browser` to be either "ie" (Internet explorer) or "firefox" (Firefox) or "chrome" (Google Chrome). 
 
 ## SAS studio
@@ -47,8 +44,7 @@ Download this package and put into Sublime "packages\\" folder or install it usi
 * Open command Platte and type in `create session`, or press `ctrl+alt+s`. 
 * On the lower screen find the "Session to Create:" box, and type in the session you want to create. If you type anything else it would fail.
     -  "`classic`" stands for the traditionally used SAS program
-    -  "`studio`" stands for SAS studio
-    -  "`studio_ue`" stands for SAS studio university edition
+    -  "`studio`" stands for SAS studio (or SAS University Edition)
 * You can create multiple sessions for each type of session. Specifically for "classic" session, 
     - if you type "classic" in the "create session" prompt, it will create a "classic:default" session. For "classic:default" session, SasSubmit will submit SAS command to the most recently activated SAS window.
     - if you type "classic:XXXXX", where "XXXXX" is not "default", for example, "classic:project_1", it will create a named classic session, with "XXXXX" being the name, from the location of your SAS program. These types of session is not the same as "classic:default" as the pid of SAS window will be remembered in these sessions.
@@ -56,7 +52,6 @@ Download this package and put into Sublime "packages\\" folder or install it usi
 * Wait for the session to be created. 
 * When the session is ready submit code using `F3` or `F4`.
 * You can change the directory of SAS session to the location of SAS program by pressing `ctrl+alt+d`.
-* Keep your Sublime application running, otherwise the connection between sublime and all existing sessions will be broken. Also keep the browser window opened by the session open, otherwise that session would be killed. 
 * You can create multiple sessions, and you can also switch to different sessions by opening command Platte and type in "choose session".
 * Having too much content in SAS can make SAS running slow. In SAS you can assign the key `ALT F12` as `"log; clear; output; winclose; odsResults; clear;"`. So When you have too many results, you can press `ALT F12` in SAS to clean the results and make it running faster.
 

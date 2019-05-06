@@ -20,7 +20,6 @@ class BlockGetter:
 	def extract_sentence(self, pt, include_newline=True, include_blank=True):
 	    """ get the sentence location from cursor location""" 
 	    cview = self.view
-	    # print(pt)
 	    if re.search("comment",cview.scope_name(pt)):
 	        return cview.extract_scope(pt)
 	    else:
@@ -160,14 +159,10 @@ class BlockGetter:
 	        sen_type=sen_info['sen_type']
 	        if sen_type in (ST_SS, ST_MS, ST_OS):
 	            if n_lines_processed == 0:
-	                # print("Stop at first line")
 	                sel_begin = self.get_sen_info(pt,include_newline=False,include_blank=True)['sen_begin']
 	            elif sen_type in (ST_SS, ST_OS):
-	                # print("Stop at ss and os")
 	                sel_begin = self.get_sen_info(pt_cur,include_newline=False,include_blank=True)['sen_begin']
 	            else:
-	                # print("Stop at others")
-	                # print(pt_pre)
 	                sel_begin = self.get_sen_info(pt_pre,include_newline=False,include_blank=False)['sen_begin']
 	            break
 	        else:
@@ -277,18 +272,14 @@ class BlockGetter:
 	    pt = sel.begin()
 	    sen_info = self.get_sen_info(pt)
 	    sen_type = sen_info['sen_type']
-	    # print("Sentence type is %s" % sen_type)
 	    if sen_type == ST_MS:
-	        # print("Expanding macro")
 	        sel_region = self.expand_macro_define(pt)
 	    elif sen_type in (ST_MF, ST_OP):
-	        # print("Expanding macro function")
 	        sen_info_updated = self.get_sen_info(pt,include_newline=False,include_blank=True)
 	        sel_region = sublime.Region(sen_info_updated['sen_begin'],sen_info_updated['sen_end'])
 	    elif sen_type == ST_CT:
 	        sel_region = self.expand_comment(pt)
 	    else:
-	        # print("Expanding others") 
 	        sel_region = self.expand_scope(pt)
 	    self.view.sel().add(sel_region)
 	    return cview.substr(sel_region)

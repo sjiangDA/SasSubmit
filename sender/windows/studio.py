@@ -46,21 +46,17 @@ class StudioSession:
     pses = self.get_browser_process()
     for ps in pses:
       for sh in ps.get_hwnds():
-        # print(sh.get_title())
-        # print(sh.hwnd)
         time.sleep(0.1)
         try:
           if require_studio:
-            # print("require_studio")
             sh.activate_if_title_icontains("sas studio",with_mouse=True,x_w=0.2,y_w=0.2)
           else:
-            # print("not require_studio")
             sh.activate(with_mouse=True,x_w=0.2,y_w=0.2)
           activation_success = True
           self.last_hwnd = sh.hwnd
           break
         except Exception as e:
-          print(e)
+          pass
     if activation_success:
       pass
     else:
@@ -98,7 +94,6 @@ class StudioSession:
       title = SingleHwnd(handle).get_title()
       submit_success = False
       error_sent = False
-      print(title)
       if re.match("SAS Studio", title):
         driver = comclt.Dispatch("WScript.Shell")
         time.sleep(0.01)

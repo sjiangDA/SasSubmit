@@ -16,13 +16,10 @@ class SessionWrapper:
     self.instance = session_parsed['instance']
     self.session_name = session_parsed['session_name']
   def new(self, session, root_path):
-    print("create new session %s at path %s" % (session, root_path))
     self.parse_session(session)
     self.session[self.session_name].new_instance(self.instance, root_path)
   def submit(self, session, root_path):
     self.parse_session(session)
-    print("session is %s" % session)
-    print("session_name is %s" % self.session_name)
     self.session[self.session_name].submit(self.instance, root_path)
   def kill(self):
     pass

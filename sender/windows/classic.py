@@ -59,7 +59,6 @@ class ClassicSession:
     if session_is_default:
       active_sas_pids = self.get_sas_process()
       if len(active_sas_pids) == 0:
-        print("find no active sas pids")
         userhome = os.path.expanduser("~")
         proc = subprocess.Popen('\"%s\" -rsasuser -sasinitialfolder = \"%s\"' % (self.sas_path, userhome))
         pid = proc.pid
@@ -72,9 +71,7 @@ class ClassicSession:
       self.meta.set("pid", pid, self.session)
 
   def activate_via_pid(self):
-    print("instance is %s" % self.instance)
     pid = self.meta.get("pid",self.session)
-    print("pid is %s" % pid)
     sp = SingleProcess(pid)
     sp.get_hwnds()[0].activate(with_mouse=True)
 
@@ -84,12 +81,11 @@ class ClassicSession:
     activation_success = False
     for hwnd in handles:
       try:
-        print("handle is %s" % hwnd)
         SingleHwnd(hwnd).activate(with_mouse=with_mouse,with_alt=with_alt)
         activation_success = True
         break
       except Exception as e:
-        print(e)
+        pass
     if activation_success:
       pass
     else:
@@ -99,7 +95,6 @@ class ClassicSession:
     if self.instance == "default":
       self.activate_last_active(r"^SAS$")
     else:
-      print("activating via pid")
       self.activate_via_pid()
 
   def submit_to_sas(self):
@@ -108,7 +103,6 @@ class ClassicSession:
     for i in range(10):
       handle = win32gui.GetForegroundWindow()
       title = SingleHwnd(handle).get_title()
-      print(title)
       if title == "SAS":
         driver = comclt.Dispatch("WScript.Shell")
         time.sleep(0.01)
@@ -125,7 +119,6 @@ class ClassicSession:
           break
     if submit_success:
       if self.activate_subl_after_submit:
-        print("activate_subl_after_submit is true")
         time.sleep(0.1)
         try:
           _ = os.popen('\"%s\" --command "sas_submit_activate"' % self.subl_path)

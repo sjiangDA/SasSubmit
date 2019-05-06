@@ -124,7 +124,6 @@ class SasSubmitCreateSessionCommand(sublime_plugin.TextCommand):
             session = session_meta['session']
             session_name = session_meta['session_name']
             instance = session_meta['instance']
-            print("session_name is %s" % session_name)
             create_new_session(session_name, instance, self.view)
 
         def on_change(input_string):
@@ -179,14 +178,12 @@ class SasSubmitChooseSessionCommand(sublime_plugin.TextCommand):
                     if wp.check_pid_belongs_to_program(pid_i, "sas.exe"):
                         pass
                     else:
-                        print("deleted %s" % pid_i)
                         session_info.delete_session(session_i)
 
         current_session = session_info.get("current_session")
         sessions_list = list(session_info.get("sessions").keys())
 
         def on_done(action):
-            # print("action is %s" % action)
             if action == -1:
                 return
             else:
@@ -209,13 +206,11 @@ class SasSubmitChooseProgramCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         session_info = SessionInfo()
         def on_done(action):
-            # print("action is %s" % action)
             if action == -1:
                 return
             else:
                 result = programs_list[action]
                 session_info.set("program", result)
-                print(result)
                 if result == "classic":
                     current_session = "classic:default"
                     logging.info("setting current_session to %s" % current_session)
@@ -246,7 +241,6 @@ class SasSubmitSetDirectoryCommand(sublime_plugin.TextCommand):
 
 class SasSubmitActivateCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        print("moving cursor to next")
         sel = [s for s in self.view.sel()][0]
         if len(sel) > 0:
             right_after = sel.end() + 1

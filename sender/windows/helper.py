@@ -44,11 +44,9 @@ class SingleHwnd:
 				win32gui.ShowWindow(self.hwnd, 9)
 			win32gui.SetForegroundWindow(self.hwnd)
 		except Exception as e:
-			print(e)
 			raise ValueError("Activate window failed!")
 
 		if with_mouse:
-			print("new position is %s, %s" % (newx, newy))
 			move_mouse_to(newx,newy)
 	def activate_if_title_icontains(self, tstr, with_mouse=False, x_w=0.5, y_w=0.5):
 		if self.title_icontains(tstr):
